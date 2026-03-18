@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services & Pricing — Solarium Marketing</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #0f0e14;
+    --card: #16141f;
+    --border: rgba(255,180,50,0.12);
+    --primary: #f59e0b;
+    --primary-light: #fbbf24;
+    --primary-deep: #d97706;
+    --accent: #ff6b2b;
+    --accent2: #fcd34d;
+    --warm-glow: #ff8c42;
+    --text: #f0ece4;
+    --muted: #9a9590;
+    --glow: rgba(245,158,11,0.35);
+    --glow-deep: rgba(255,107,43,0.25);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top:0; left:0; right:0; z-index: 100;
+    padding: 18px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    backdrop-filter: blur(20px);
+    background: rgba(10,10,15,0.75);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-weight: 800; font-size: 1.35rem;
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+  }
+  .logo-sun {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: radial-gradient(circle, var(--accent2), var(--primary), var(--accent));
+    box-shadow: 0 0 16px var(--glow), 0 0 32px var(--glow-deep);
+    animation: sunPulse 3s ease-in-out infinite;
+  }
+  @keyframes sunPulse {
+    0%,100% { box-shadow: 0 0 16px var(--glow), 0 0 32px var(--glow-deep); transform: scale(1); }
+    50% { box-shadow: 0 0 24px var(--glow), 0 0 48px var(--glow-deep); transform: scale(1.06); }
+  }
+  .logo-text {
+    background: linear-gradient(135deg, var(--accent2), var(--primary), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .logo-text span { font-weight: 400; opacity: 0.6; }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; font-size: 0.88rem;
+    font-weight: 500; transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    padding: 10px 28px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #0a0a0f; border:none; border-radius:30px;
+    font-weight:700; font-size:0.85rem; cursor:pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-decoration: none;
+  }
+  .nav-cta:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--glow); }
+
+  /* ── PAGE HERO ── */
+  .page-hero {
+    padding: 160px 60px 80px;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .page-hero::before {
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(ellipse at top center, rgba(245,158,11,0.08), transparent 60%);
+  }
+  .page-hero h1 {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 900; letter-spacing: -1.5px;
+    margin-bottom: 18px; position: relative;
+  }
+  .gradient-text {
+    background: linear-gradient(135deg, var(--accent2), var(--primary), var(--accent), var(--warm-glow));
+    background-size: 300% 300%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    animation: solarShift 5s ease infinite;
+  }
+  @keyframes solarShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+  .page-hero p {
+    font-size: 1.1rem; color: var(--muted);
+    max-width: 600px; margin: 0 auto;
+    line-height: 1.7; position: relative;
+  }
+
+  /* ── SECTIONS ── */
+  .section-pad { padding: 100px 60px; }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem; color: var(--primary);
+    letter-spacing: 4px; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 800; letter-spacing: -0.5px;
+    margin-bottom: 16px; line-height: 1.2;
+  }
+  .section-desc {
+    font-size: 1rem; color: var(--muted);
+    max-width: 540px; line-height: 1.7;
+  }
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── SERVICE DETAIL BLOCKS ── */
+  .service-detail {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    padding: 80px 60px;
+    border-bottom: 1px solid var(--border);
+  }
+  .service-detail.reverse { direction: rtl; }
+  .service-detail.reverse > * { direction: ltr; }
+  .sd-content { }
+  .sd-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem; color: var(--primary);
+    letter-spacing: 3px; margin-bottom: 12px;
+  }
+  .sd-content h2 {
+    font-size: 1.8rem; font-weight: 800;
+    margin-bottom: 16px; letter-spacing: -0.5px;
+  }
+  .sd-content p {
+    font-size: 0.95rem; color: var(--muted);
+    line-height: 1.7; margin-bottom: 20px;
+  }
+  .sd-features {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 14px; margin-top: 24px;
+  }
+  .sd-feature {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 0.85rem;
+  }
+  .sd-feature-icon {
+    width: 24px; height: 24px; border-radius: 6px;
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; flex-shrink: 0;
+    color: var(--primary-light);
+  }
+  .sd-feature span { color: var(--muted); line-height: 1.5; }
+  .sd-visual {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 4/3;
+  }
+  .sd-visual canvas { width: 100%; height: 100%; display: block; }
+
+  /* ── PRICING ── */
+  .pricing-section {
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+  .pricing-section::before {
+    content:''; position: absolute; inset:0;
+    background: radial-gradient(ellipse at center bottom, rgba(245,158,11,0.06), transparent 50%);
+  }
+  .pricing-toggle {
+    display: flex; gap: 0;
+    margin: 40px auto 0;
+    width: fit-content;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 4px;
+    position: relative;
+  }
+  .pricing-toggle button {
+    padding: 10px 28px;
+    border: none; border-radius: 50px;
+    font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; background: transparent;
+    color: var(--muted);
+    transition: color 0.3s;
+    position: relative; z-index: 1;
+  }
+  .pricing-toggle button.active { color: #0a0a0f; }
+  .toggle-slider {
+    position: absolute;
+    top: 4px; left: 4px;
+    height: calc(100% - 8px);
+    width: calc(50% - 4px);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 50px;
+    transition: transform 0.3s ease;
+  }
+  .toggle-slider.annual { transform: translateX(100%); }
+  .pricing-save {
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-weight: 600;
+    margin-left: 6px;
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 48px;
+    position: relative;
+  }
+  .pricing-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px;
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .pricing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  }
+  .pricing-card.featured {
+    border-color: var(--primary);
+    box-shadow: 0 0 40px var(--glow-deep);
+  }
+  .pricing-card.featured::before {
+    content: 'Most Popular';
+    position: absolute;
+    top: -12px; left: 50%; transform: translateX(-50%);
+    padding: 5px 18px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #0a0a0f;
+    font-size: 0.72rem; font-weight: 700;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .pricing-tier {
+    font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 2px; color: var(--primary-light);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 8px;
+  }
+  .pricing-name {
+    font-size: 1.4rem; font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .pricing-desc {
+    font-size: 0.85rem; color: var(--muted);
+    line-height: 1.6; margin-bottom: 24px;
+  }
+  .pricing-price {
+    display: flex; align-items: baseline; gap: 4px;
+    margin-bottom: 6px;
+  }
+  .pricing-amount {
+    font-size: 3rem; font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+    background: linear-gradient(135deg, var(--accent2), var(--primary));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .pricing-period {
+    font-size: 0.85rem; color: var(--muted);
+  }
+  .pricing-note {
+    font-size: 0.78rem; color: var(--muted);
+    margin-bottom: 28px;
+  }
+  .pricing-divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 28px;
+  }
+  .pricing-features { list-style: none; margin-bottom: 32px; }
+  .pricing-features li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 0.88rem; margin-bottom: 14px;
+    color: var(--text);
+  }
+  .pricing-features li .check {
+    color: var(--primary-light);
+    font-weight: 700; flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .pricing-features li.dim { color: var(--muted); }
+  .pricing-features li.dim .check { color: #444; }
+  .pricing-btn {
+    display: block; width: 100%;
+    padding: 14px;
+    border-radius: 50px;
+    font-size: 0.92rem; font-weight: 700;
+    text-align: center; cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-decoration: none;
+  }
+  .pricing-btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #0a0a0f; border: none;
+  }
+  .pricing-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px var(--glow-deep); }
+  .pricing-btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .pricing-btn-secondary:hover { border-color: var(--primary); background: rgba(245,158,11,0.05); }
+
+  /* ── ADD-ONS ── */
+  .addons-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 48px;
+  }
+  .addon-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .addon-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+  .addon-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; margin-bottom: 16px;
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.12);
+  }
+  .addon-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+  .addon-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+  .addon-price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem; font-weight: 700;
+    color: var(--primary-light);
+  }
+
+  /* ── FAQ ── */
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 48px;
+  }
+  .faq-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .faq-item:hover { border-color: rgba(245,158,11,0.25); }
+  .faq-question {
+    padding: 24px 28px;
+    cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 600; font-size: 0.95rem;
+    transition: color 0.3s;
+  }
+  .faq-question:hover { color: var(--primary-light); }
+  .faq-arrow {
+    font-size: 1.2rem; color: var(--primary);
+    transition: transform 0.3s;
+  }
+  .faq-item.open .faq-arrow { transform: rotate(45deg); }
+  .faq-answer {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+  }
+  .faq-item.open .faq-answer { max-height: 300px; }
+  .faq-answer-inner {
+    padding: 0 28px 24px;
+    font-size: 0.88rem; color: var(--muted); line-height: 1.7;
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    text-align: center; padding: 120px 60px;
+    position: relative; overflow: hidden;
+  }
+  .cta-section::before {
+    content:''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(245,158,11,0.1), transparent 60%);
+  }
+  .cta-section h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900; letter-spacing: -1px;
+    margin-bottom: 16px; position: relative;
+  }
+  .cta-section p { color: var(--muted); font-size: 1.02rem; margin-bottom: 32px; position: relative; }
+  .cta-buttons { display: flex; gap: 14px; justify-content: center; position: relative; }
+  .btn-primary {
+    padding: 15px 36px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #0a0a0f; border: none; border-radius: 50px;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-decoration: none;
+  }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow: 0 16px 36px var(--glow-deep); }
+  .btn-secondary {
+    padding: 15px 36px; background: transparent;
+    color: var(--text); border: 1px solid var(--border); border-radius: 50px;
+    font-size: 0.95rem; font-weight: 500; cursor: pointer;
+    transition: border-color 0.3s, background 0.3s; text-decoration: none;
+  }
+  .btn-secondary:hover { border-color: var(--primary); background: rgba(245,158,11,0.06); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 60px;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px; color: var(--muted); font-size: 0.85rem;
+  }
+  footer a { color: var(--muted); text-decoration:none; transition: color 0.3s; }
+  footer a:hover { color: var(--primary-light); }
+  .footer-brand p { margin-top: 12px; line-height: 1.7; }
+  .footer-col h4 { color: var(--text); font-size:0.88rem; font-weight:600; margin-bottom: 14px; }
+  .footer-col ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  .footer-bottom {
+    grid-column: 1 / -1; padding-top: 28px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; font-size: 0.78rem;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .service-detail { grid-template-columns: 1fr; gap: 36px; }
+    .service-detail.reverse { direction: ltr; }
+    .pricing-grid { grid-template-columns: 1fr 1fr; }
+    .addons-grid { grid-template-columns: 1fr 1fr; }
+    footer { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    nav { padding: 14px 24px; }
+    .nav-links { display: none; }
+    .page-hero { padding: 130px 24px 60px; }
+    .section-pad { padding: 70px 24px; }
+    .service-detail { padding: 60px 24px; }
+    .sd-features { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .addons-grid { grid-template-columns: 1fr; }
+    .faq-grid { grid-template-columns: 1fr; }
+    footer { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 8px; }
+    .cta-buttons { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-sun"></div>
+    <div class="logo-text">solarium <span>marketing</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="index.html#platforms">Platforms</a></li>
+    <li><a href="index.html#how">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="index.html#contact-form" class="nav-cta">Get Free Audit</a>
+</nav>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <h1>Services & <span class="gradient-text">Pricing</span></h1>
+  <p>Every service powered by data science. Choose the level of algorithmic intelligence that fits your growth stage.</p>
+</section>
+
+<!-- SERVICE 1 -->
+<div id="algo" class="service-detail reveal">
+  <div class="sd-content">
+    <div class="sd-number">SERVICE 01</div>
+    <h2>Algorithm Reverse-Engineering</h2>
+    <p>We build statistical models of each platform's recommendation engine, identifying the exact signals — watch time, engagement velocity, save ratios, share depth — that determine how your content gets distributed.</p>
+    <p>Every model is custom-built for your niche, trained on your competitor landscape, and validated against real performance data.</p>
+    <div class="sd-features">
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Platform-specific signal mapping</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Competitor algorithm audit</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Feature importance rankings</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Monthly model retraining</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Regression + neural net models</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Distribution probability scoring</span></div>
+    </div>
+  </div>
+  <div class="sd-visual"><canvas id="viz1"></canvas></div>
+</div>
+
+<!-- SERVICE 2 -->
+<div id="scoring" class="service-detail reverse reveal">
+  <div class="sd-content">
+    <div class="sd-number">SERVICE 02</div>
+    <h2>Predictive Content Scoring</h2>
+    <p>Before you hit publish, our ML models score every piece of content against platform-specific ranking factors. You'll know the viral probability, optimal posting window, and recommended content adjustments.</p>
+    <p>Stop guessing which posts will perform. Let the model tell you.</p>
+    <div class="sd-features">
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Pre-publish viral scoring</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Optimal posting time models</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Hook & caption optimization</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Format recommendation engine</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>A/B content framework</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Hashtag signal analysis</span></div>
+    </div>
+  </div>
+  <div class="sd-visual"><canvas id="viz2"></canvas></div>
+</div>
+
+<!-- SERVICE 3 -->
+<div id="tracking" class="service-detail reveal">
+  <div class="sd-content">
+    <div class="sd-number">SERVICE 03</div>
+    <h2>Real-Time Signal Tracking</h2>
+    <p>Live dashboards monitoring 50+ algorithmic signals across every platform. Get alerted the moment an algorithm shifts so you can adapt before competitors even notice.</p>
+    <p>Includes drift detection, anomaly alerts, and weekly algorithm change reports.</p>
+    <div class="sd-features">
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>50+ signal monitoring</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Real-time drift detection</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Slack / email anomaly alerts</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Weekly algorithm digests</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Custom dashboard access</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Historical trend analysis</span></div>
+    </div>
+  </div>
+  <div class="sd-visual"><canvas id="viz3"></canvas></div>
+</div>
+
+<!-- SERVICE 4 -->
+<div id="seo" class="service-detail reverse reveal">
+  <div class="sd-content">
+    <div class="sd-number">SERVICE 04</div>
+    <h2>SEO & AI Search Optimization</h2>
+    <p>Adapt to Google's AI-powered search landscape. We optimize for traditional ranking, AI Overviews, and SGE inclusion using structured data modeling and entity relationship mapping.</p>
+    <div class="sd-features">
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>E-E-A-T signal modeling</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>AI Overview optimization</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Entity & knowledge graph mapping</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Technical SEO audits</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Content gap analysis</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Passage ranking optimization</span></div>
+    </div>
+  </div>
+  <div class="sd-visual"><canvas id="viz4"></canvas></div>
+</div>
+
+<!-- SERVICE 5 -->
+<div id="paid" class="service-detail reveal" style="border-bottom:none;">
+  <div class="sd-content">
+    <div class="sd-number">SERVICE 05</div>
+    <h2>Algorithm-Aware Paid Media</h2>
+    <p>We model ad delivery algorithms — auction dynamics, quality score mechanics, audience signal weighting — to maximize ROAS across Meta, Google, TikTok, and LinkedIn ads.</p>
+    <div class="sd-features">
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Auction dynamics modeling</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Quality score optimization</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Audience signal analysis</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Cross-platform bid strategy</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Creative fatigue prediction</span></div>
+      <div class="sd-feature"><div class="sd-feature-icon">&#10003;</div><span>Budget allocation modeling</span></div>
+    </div>
+  </div>
+  <div class="sd-visual"><canvas id="viz5"></canvas></div>
+</div>
+
+<!-- PRICING -->
+<section id="pricing" class="pricing-section section-pad">
+  <div class="reveal" style="text-align:center;">
+    <div class="section-label">// Investment</div>
+    <h2 class="section-title">Transparent, Results-Driven Pricing</h2>
+    <p class="section-desc" style="margin:0 auto;">Every plan includes a dedicated algorithm strategist, custom models, and monthly reporting.</p>
+
+    <div class="pricing-toggle">
+      <div class="toggle-slider" id="toggleSlider"></div>
+      <button class="active" id="monthlyBtn" onclick="setPricing('monthly')">Monthly</button>
+      <button id="annualBtn" onclick="setPricing('annual')">Annual <span class="pricing-save">Save 20%</span></button>
+    </div>
+  </div>
+
+  <div class="pricing-grid">
+    <!-- IGNITE -->
+    <div class="pricing-card reveal">
+      <div class="pricing-tier">Ignite</div>
+      <div class="pricing-name">Single Platform</div>
+      <div class="pricing-desc">Perfect for brands focused on dominating one platform's algorithm.</div>
+      <div class="pricing-price">
+        <span class="pricing-amount" data-monthly="2,500" data-annual="2,000">$2,500</span>
+        <span class="pricing-period">/month</span>
+      </div>
+      <div class="pricing-note">Minimum 3-month engagement</div>
+      <div class="pricing-divider"></div>
+      <ul class="pricing-features">
+        <li><span class="check">&#10003;</span> 1 platform algorithm model</li>
+        <li><span class="check">&#10003;</span> Predictive content scoring</li>
+        <li><span class="check">&#10003;</span> Weekly strategy playbooks</li>
+        <li><span class="check">&#10003;</span> Signal tracking dashboard</li>
+        <li><span class="check">&#10003;</span> Monthly performance report</li>
+        <li><span class="check">&#10003;</span> Dedicated strategist</li>
+        <li class="dim"><span class="check">&#10005;</span> Cross-platform modeling</li>
+        <li class="dim"><span class="check">&#10005;</span> Paid media optimization</li>
+      </ul>
+      <a href="index.html#contact-form" class="pricing-btn pricing-btn-secondary">Get Started</a>
+    </div>
+
+    <!-- RADIANCE -->
+    <div class="pricing-card featured reveal">
+      <div class="pricing-tier">Radiance</div>
+      <div class="pricing-name">Multi-Platform</div>
+      <div class="pricing-desc">For brands ready to dominate across 3+ platforms with unified algorithmic strategy.</div>
+      <div class="pricing-price">
+        <span class="pricing-amount" data-monthly="5,500" data-annual="4,400">$5,500</span>
+        <span class="pricing-period">/month</span>
+      </div>
+      <div class="pricing-note">Minimum 3-month engagement</div>
+      <div class="pricing-divider"></div>
+      <ul class="pricing-features">
+        <li><span class="check">&#10003;</span> Up to 3 platform algorithm models</li>
+        <li><span class="check">&#10003;</span> Predictive content scoring (all platforms)</li>
+        <li><span class="check">&#10003;</span> Cross-platform signal mapping</li>
+        <li><span class="check">&#10003;</span> Real-time drift alerts</li>
+        <li><span class="check">&#10003;</span> Bi-weekly strategy sessions</li>
+        <li><span class="check">&#10003;</span> SEO & AI search optimization</li>
+        <li><span class="check">&#10003;</span> Custom reporting dashboard</li>
+        <li class="dim"><span class="check">&#10005;</span> Paid media optimization</li>
+      </ul>
+      <a href="index.html#contact-form" class="pricing-btn pricing-btn-primary">Get Started</a>
+    </div>
+
+    <!-- SUPERNOVA -->
+    <div class="pricing-card reveal">
+      <div class="pricing-tier">Supernova</div>
+      <div class="pricing-name">Full-Stack</div>
+      <div class="pricing-desc">The complete algorithmic marketing engine. Organic + paid, every platform, total dominance.</div>
+      <div class="pricing-price">
+        <span class="pricing-amount" data-monthly="10,000" data-annual="8,000">$10,000</span>
+        <span class="pricing-period">/month</span>
+      </div>
+      <div class="pricing-note">+ ad spend managed separately</div>
+      <div class="pricing-divider"></div>
+      <ul class="pricing-features">
+        <li><span class="check">&#10003;</span> Unlimited platform models</li>
+        <li><span class="check">&#10003;</span> Predictive scoring + auto-optimization</li>
+        <li><span class="check">&#10003;</span> Full paid media management</li>
+        <li><span class="check">&#10003;</span> Algorithm-aware ad placement</li>
+        <li><span class="check">&#10003;</span> Weekly strategy war rooms</li>
+        <li><span class="check">&#10003;</span> Priority drift detection & alerts</li>
+        <li><span class="check">&#10003;</span> Custom API access to models</li>
+        <li><span class="check">&#10003;</span> Quarterly algorithm deep-dives</li>
+      </ul>
+      <a href="index.html#contact-form" class="pricing-btn pricing-btn-secondary">Get Started</a>
+    </div>
+  </div>
+</section>
+
+<!-- ADD-ONS -->
+<section class="section-pad">
+  <div class="reveal" style="text-align:center;">
+    <div class="section-label">// Enhancements</div>
+    <h2 class="section-title">Add-On Services</h2>
+    <p class="section-desc" style="margin:0 auto;">Bolt these onto any plan for deeper coverage.</p>
+  </div>
+  <div class="addons-grid">
+    <div class="addon-card reveal">
+      <div class="addon-icon">&#x1f4ca;</div>
+      <h3>Additional Platform</h3>
+      <p>Add an extra platform algorithm model to any existing plan.</p>
+      <div class="addon-price">+$1,200/mo</div>
+    </div>
+    <div class="addon-card reveal">
+      <div class="addon-icon">&#x1f9ec;</div>
+      <h3>Competitor Deep-Dive</h3>
+      <p>Full algorithmic audit of up to 5 competitors per platform.</p>
+      <div class="addon-price">$3,500 one-time</div>
+    </div>
+    <div class="addon-card reveal">
+      <div class="addon-icon">&#x26a1;</div>
+      <h3>Content Production</h3>
+      <p>Algorithm-optimized content creation: scripts, visuals, and copy.</p>
+      <div class="addon-price">+$2,000/mo</div>
+    </div>
+    <div class="addon-card reveal">
+      <div class="addon-icon">&#x1f393;</div>
+      <h3>Team Training Workshop</h3>
+      <p>Half-day workshop teaching your team to think algorithmically.</p>
+      <div class="addon-price">$4,000 one-time</div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="section-pad" style="background:var(--surface);">
+  <div class="reveal" style="text-align:center;">
+    <div class="section-label">// Questions</div>
+    <h2 class="section-title">Frequently Asked</h2>
+  </div>
+  <div class="faq-grid">
+    <div class="faq-item reveal">
+      <div class="faq-question">How do you actually "decode" an algorithm?<span class="faq-arrow">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">We collect thousands of data points from content performance across each platform, then use statistical modeling techniques — regression analysis, random forests, gradient boosting, and neural networks — to identify which variables have the highest predictive power for content distribution. Think of it like reverse-engineering a recipe by analyzing the ingredients and outcomes.</div></div>
+    </div>
+    <div class="faq-item reveal">
+      <div class="faq-question">How long until we see results?<span class="faq-arrow">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">Most clients see measurable improvements within the first 30 days. Our models typically reach peak accuracy by week 6-8 as they accumulate more data from your specific content. We require a 3-month minimum engagement because algorithmic strategies compound over time.</div></div>
+    </div>
+    <div class="faq-item reveal">
+      <div class="faq-question">Do you guarantee specific results?<span class="faq-arrow">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">We don't guarantee specific numbers because algorithms are controlled by the platforms. What we guarantee is rigorous, data-driven methodology. Our average client sees a 347% reach increase, but your results depend on your niche, content quality, and how closely you follow model recommendations.</div></div>
+    </div>
+    <div class="faq-item reveal">
+      <div class="faq-question">What happens when algorithms change?<span class="faq-arrow">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">This is our core advantage. Our real-time signal tracking detects algorithm shifts within hours. Models are automatically retrained when drift is detected, and your strategy adapts accordingly. Clients on the Radiance and Supernova plans get priority alerts.</div></div>
+    </div>
+    <div class="faq-item reveal">
+      <div class="faq-question">Can you work with our existing marketing team?<span class="faq-arrow">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">Absolutely. Most of our clients have in-house teams. We act as the algorithmic intelligence layer — providing the data, models, and strategic recommendations that your team executes. We also offer training workshops to upskill your team's algorithmic thinking.</div></div>
+    </div>
+    <div class="faq-item reveal">
+      <div class="faq-question">What data do you need from us to start?<span class="faq-arrow">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner">We need platform analytics access (read-only), your content calendar history, and any existing performance data. The more historical data available, the faster our models reach accuracy. We handle all the data engineering — you just grant access and we do the rest.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="reveal">
+    <h2>Not Sure Which Plan? <span class="gradient-text">Let's Talk.</span></h2>
+    <p>Book a free 30-minute algorithm audit and we'll recommend the right level for your brand.</p>
+    <div class="cta-buttons">
+      <a href="index.html#contact-form" class="btn-primary">Book Free Audit</a>
+      <a href="index.html" class="btn-secondary">Back to Home</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <div class="logo" style="margin-bottom:10px;">
+      <div class="logo-sun" style="width:20px;height:20px;"></div>
+      <div class="logo-text">solarium <span>marketing</span></div>
+    </div>
+    <p>Data science-powered marketing intelligence. We illuminate platform algorithms so your content gets the distribution it deserves.</p>
+  </div>
+  <div class="footer-col">
+    <h4>Services</h4>
+    <ul>
+      <li><a href="#algo">Algorithm Modeling</a></li>
+      <li><a href="#scoring">Content Scoring</a></li>
+      <li><a href="#seo">SEO / SGE</a></li>
+      <li><a href="#paid">Paid Media</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <h4>Platforms</h4>
+    <ul>
+      <li><a href="#">TikTok</a></li>
+      <li><a href="#">YouTube</a></li>
+      <li><a href="#">Instagram</a></li>
+      <li><a href="#">Google</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <h4>Company</h4>
+    <ul>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Case Studies</a></li>
+      <li><a href="#">Blog</a></li>
+      <li><a href="index.html#contact-form">Contact</a></li>
+    </ul>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 Solarium Marketing. A Solarium Holdings company.</span>
+    <span>Privacy &middot; Terms</span>
+  </div>
+</footer>
+
+<script>
+// ── REVEAL ──
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) setTimeout(() => entry.target.classList.add('visible'), i * 80);
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── PRICING TOGGLE ──
+function setPricing(mode) {
+  const slider = document.getElementById('toggleSlider');
+  const mBtn = document.getElementById('monthlyBtn');
+  const aBtn = document.getElementById('annualBtn');
+  document.querySelectorAll('.pricing-amount').forEach(el => {
+    el.textContent = '$' + el.dataset[mode];
+  });
+  if (mode === 'annual') {
+    slider.classList.add('annual');
+    aBtn.classList.add('active'); mBtn.classList.remove('active');
+  } else {
+    slider.classList.remove('annual');
+    mBtn.classList.add('active'); aBtn.classList.remove('active');
+  }
+}
+
+// ── FAQ TOGGLE ──
+document.querySelectorAll('.faq-question').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.parentElement;
+    document.querySelectorAll('.faq-item').forEach(fi => { if (fi !== item) fi.classList.remove('open'); });
+    item.classList.toggle('open');
+  });
+});
+
+// ── SERVICE VISUALIZATIONS ──
+function animateViz(canvasId, drawFn) {
+  const c = document.getElementById(canvasId);
+  if (!c) return;
+  const cx = c.getContext('2d');
+  const parent = c.parentElement;
+  let running = false;
+  function loop() {
+    c.width = parent.offsetWidth; c.height = parent.offsetHeight;
+    drawFn(cx, c.width, c.height, Date.now() * 0.001);
+    if (running) requestAnimationFrame(loop);
+  }
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { running = e.isIntersecting; if (running) loop(); });
+  });
+  obs.observe(c);
+}
+
+// Viz 1: algo bars
+animateViz('viz1', (cx, w, h, t) => {
+  for (let i = 0; i < 24; i++) {
+    const bw = w / 26;
+    const bh = (0.2 + 0.8 * Math.abs(Math.sin(t * 0.8 + i * 0.5))) * h * 0.8;
+    const grad = cx.createLinearGradient(0, h - bh, 0, h);
+    grad.addColorStop(0, 'rgba(245,158,11,0.5)'); grad.addColorStop(1, 'rgba(255,107,43,0.05)');
+    cx.fillStyle = grad;
+    cx.beginPath();
+    cx.roundRect(i * bw + i * 2 + 12, h - bh, bw, bh, [4, 4, 0, 0]);
+    cx.fill();
+  }
+});
+
+// Viz 2: wave + score overlay
+animateViz('viz2', (cx, w, h, t) => {
+  for (let l = 0; l < 3; l++) {
+    cx.beginPath();
+    for (let x = 0; x <= w; x++) {
+      const y = h * 0.5 + Math.sin(x * 0.015 + t * (1.5 + l * 0.3) + l) * (25 - l * 5) + Math.cos(x * 0.008 + t + l * 2) * 15;
+      x === 0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
+    }
+    const colors = ['rgba(252,211,77,0.5)', 'rgba(245,158,11,0.35)', 'rgba(255,107,43,0.2)'];
+    cx.strokeStyle = colors[l]; cx.lineWidth = 2; cx.stroke();
+    cx.lineTo(w, h); cx.lineTo(0, h); cx.closePath();
+    const grad = cx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, colors[l].replace('0.5', '0.08').replace('0.35', '0.06').replace('0.2', '0.04'));
+    grad.addColorStop(1, 'transparent');
+    cx.fillStyle = grad; cx.fill();
+  }
+  // Score
+  cx.fillStyle = 'rgba(245,158,11,0.9)';
+  cx.font = 'bold 48px JetBrains Mono';
+  const score = (82 + Math.sin(t) * 8).toFixed(1);
+  cx.fillText(score, w * 0.08, h * 0.35);
+  cx.font = '12px JetBrains Mono';
+  cx.fillStyle = 'rgba(245,158,11,0.5)';
+  cx.fillText('VIRAL SCORE', w * 0.08, h * 0.35 + 20);
+});
+
+// Viz 3: signal dots network
+animateViz('viz3', (cx, w, h, t) => {
+  const nodes = [];
+  for (let i = 0; i < 25; i++) {
+    const x = (Math.sin(t * 0.4 + i * 1.5) * 0.35 + 0.5) * w;
+    const y = (Math.cos(t * 0.3 + i * 1.1) * 0.35 + 0.5) * h;
+    nodes.push({ x, y });
+    const pulse = Math.sin(t * 2 + i) * 0.3 + 0.7;
+    cx.beginPath(); cx.arc(x, y, 4 + pulse * 3, 0, Math.PI * 2);
+    cx.fillStyle = `rgba(245,158,11,${0.4 + pulse * 0.3})`;
+    cx.fill();
+    cx.beginPath(); cx.arc(x, y, 10 + pulse * 6, 0, Math.PI * 2);
+    cx.fillStyle = `rgba(245,158,11,${0.05 + pulse * 0.05})`;
+    cx.fill();
+  }
+  for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
+    const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 150) {
+      cx.beginPath(); cx.moveTo(nodes[i].x, nodes[i].y); cx.lineTo(nodes[j].x, nodes[j].y);
+      cx.strokeStyle = `rgba(255,140,66,${0.15 * (1 - dist / 150)})`; cx.lineWidth = 1; cx.stroke();
+    }
+  }
+});
+
+// Viz 4: SEO entity graph
+animateViz('viz4', (cx, w, h, t) => {
+  const labels = ['E-E-A-T', 'Entities', 'Passages', 'Schema', 'AI Overview', 'Links'];
+  const cx1 = w / 2, cy1 = h / 2, r = Math.min(w, h) * 0.32;
+  labels.forEach((label, i) => {
+    const angle = (i / labels.length) * Math.PI * 2 + t * 0.2;
+    const x = cx1 + Math.cos(angle) * r;
+    const y = cy1 + Math.sin(angle) * r;
+    // line to center
+    cx.beginPath(); cx.moveTo(cx1, cy1); cx.lineTo(x, y);
+    cx.strokeStyle = 'rgba(245,158,11,0.15)'; cx.lineWidth = 1; cx.stroke();
+    // node
+    cx.beginPath(); cx.arc(x, y, 20, 0, Math.PI * 2);
+    cx.fillStyle = 'rgba(245,158,11,0.12)'; cx.fill();
+    cx.strokeStyle = 'rgba(245,158,11,0.3)'; cx.lineWidth = 1; cx.stroke();
+    cx.fillStyle = 'rgba(252,211,77,0.8)';
+    cx.font = '9px JetBrains Mono'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+    cx.fillText(label, x, y);
+  });
+  // center node
+  cx.beginPath(); cx.arc(cx1, cy1, 28, 0, Math.PI * 2);
+  const g = cx.createRadialGradient(cx1, cy1, 0, cx1, cy1, 28);
+  g.addColorStop(0, 'rgba(245,158,11,0.3)'); g.addColorStop(1, 'rgba(245,158,11,0.05)');
+  cx.fillStyle = g; cx.fill();
+  cx.fillStyle = 'rgba(252,211,77,0.9)';
+  cx.font = 'bold 10px JetBrains Mono';
+  cx.fillText('RANK', cx1, cy1);
+});
+
+// Viz 5: auction dynamics
+animateViz('viz5', (cx, w, h, t) => {
+  // bid bars rising
+  const platforms = ['Meta', 'Google', 'TikTok', 'LinkedIn'];
+  const bw = w / (platforms.length * 2 + 1);
+  platforms.forEach((p, i) => {
+    const x = bw + i * bw * 2;
+    const bh1 = (0.3 + 0.5 * Math.abs(Math.sin(t + i))) * h * 0.6;
+    const bh2 = (0.2 + 0.6 * Math.abs(Math.cos(t * 1.2 + i))) * h * 0.6;
+    // our bid
+    let grad = cx.createLinearGradient(0, h - bh1, 0, h);
+    grad.addColorStop(0, 'rgba(245,158,11,0.5)'); grad.addColorStop(1, 'rgba(245,158,11,0.1)');
+    cx.fillStyle = grad;
+    cx.beginPath(); cx.roundRect(x, h - bh1, bw * 0.45, bh1, [3, 3, 0, 0]); cx.fill();
+    // competitor
+    grad = cx.createLinearGradient(0, h - bh2, 0, h);
+    grad.addColorStop(0, 'rgba(255,255,255,0.12)'); grad.addColorStop(1, 'rgba(255,255,255,0.02)');
+    cx.fillStyle = grad;
+    cx.beginPath(); cx.roundRect(x + bw * 0.5, h - bh2, bw * 0.45, bh2, [3, 3, 0, 0]); cx.fill();
+    // label
+    cx.fillStyle = 'rgba(245,158,11,0.5)';
+    cx.font = '9px JetBrains Mono'; cx.textAlign = 'center';
+    cx.fillText(p, x + bw * 0.45, h - 8);
+  });
+  // ROAS overlay
+  cx.fillStyle = 'rgba(252,211,77,0.8)';
+  cx.font = 'bold 36px JetBrains Mono'; cx.textAlign = 'right';
+  const roas = (2.0 + Math.sin(t * 0.5) * 0.6).toFixed(1);
+  cx.fillText(roas + 'x', w - 24, 50);
+  cx.font = '10px JetBrains Mono';
+  cx.fillStyle = 'rgba(245,158,11,0.4)';
+  cx.fillText('ROAS', w - 24, 66);
+});
+
+// ── SMOOTH SCROLL ──
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>
