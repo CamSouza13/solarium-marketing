@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solarium Marketing — Algorithm-Driven Marketing</title>
+<!-- GSAP + ScrollTrigger + Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#faf9f7; --surface:#fff; --card:#fff;
+    --border:rgba(0,0,0,0.07);
+    --primary:#d97706; --primary-light:#f59e0b; --accent:#ea580c;
+    --text:#1a1a1a; --muted:#6b7280;
+    --glow:rgba(217,119,6,0.15);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{overflow-x:hidden}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(16px);background:rgba(250,249,247,0.88);border-bottom:1px solid var(--border);transition:transform 0.4s}
+  nav.hide{transform:translateY(-100%)}
+  .nav-left{display:flex;align-items:center;gap:8px;text-decoration:none}
+  .nav-sun{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#fcd34d,#f59e0b,#ea580c);box-shadow:0 0 10px var(--glow);display:none}
+  .logo-svg{width:32px;height:32px;flex-shrink:0}
+  .nav-name{font-weight:800;font-size:1.15rem;color:var(--text)}
+  .nav-right{display:flex;align-items:center;gap:32px}
+  .nav-right a{color:var(--muted);text-decoration:none;font-size:0.88rem;font-weight:500;transition:color 0.3s}
+  .nav-right a:hover{color:var(--text)}
+  .nav-btn{padding:9px 24px;background:var(--primary);color:#fff!important;border-radius:8px;font-weight:700;font-size:0.84rem;text-decoration:none;transition:transform 0.2s}
+  .nav-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px var(--glow)}
+
+  /* FULL-SCREEN SECTIONS */
+  .panel{min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+
+  /* HERO */
+  .hero-panel{padding:0 48px}
+  .hero-content{max-width:700px;position:relative;z-index:2}
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:0.78rem;font-weight:600;color:var(--primary);margin-bottom:24px;opacity:0}
+  .hero-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--primary);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,119,6,0.4)}50%{box-shadow:0 0 0 8px rgba(217,119,6,0)}}
+  .hero-content h1{font-size:clamp(3rem,6vw,5rem);font-weight:900;line-height:1.05;letter-spacing:-2.5px;opacity:0}
+  .hero-content h1 em{font-style:normal;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero-sub{font-size:1.15rem;color:var(--muted);line-height:1.75;margin:24px 0 36px;max-width:520px;opacity:0}
+  .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;opacity:0}
+  .btn{padding:16px 36px;border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:none}
+  .btn-fill{background:var(--primary);color:#fff}
+  .btn-fill:hover{transform:translateY(-2px);box-shadow:0 12px 32px var(--glow)}
+  .btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .btn-outline:hover{border-color:var(--primary)}
+  .hero-proof{display:flex;align-items:center;gap:24px;margin-top:48px;opacity:0}
+  .hero-proof-item{display:flex;flex-direction:column}
+  .proof-num{font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:800;color:var(--primary)}
+  .proof-label{font-size:0.72rem;color:var(--muted)}
+  .proof-divider{width:1px;height:40px;background:var(--border)}
+
+  /* 3D CANVAS */
+  #three-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none}
+
+  /* SCROLL SECTIONS */
+  .scroll-section{position:relative;z-index:2}
+  .s-pad{padding:120px 48px;max-width:1200px;margin:0 auto}
+  .label{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--primary);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px}
+  .stitle{font-size:clamp(2rem,4vw,3.2rem);font-weight:800;letter-spacing:-1px;line-height:1.1;margin-bottom:16px}
+  .sdesc{font-size:1rem;color:var(--muted);line-height:1.7;max-width:520px}
+
+  /* ABOUT */
+  .about-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .about-inner{max-width:1200px;margin:0 auto;padding:100px 48px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;width:100%}
+  .about-text h2{font-size:1.8rem;font-weight:800;margin-bottom:16px}
+  .about-text p{color:var(--muted);line-height:1.75;font-size:0.95rem;margin-bottom:12px}
+  .about-text strong{color:var(--text)}
+  .credentials{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+  .cred{padding:6px 14px;border-radius:8px;background:rgba(217,119,6,0.06);border:1px solid rgba(217,119,6,0.12);font-size:0.78rem;font-weight:600;color:var(--primary)}
+  .about-photo{border-radius:20px;overflow:hidden;aspect-ratio:3/4;background:#eee;border:1px solid var(--border)}
+  .about-photo img{width:100%;height:100%;object-fit:cover;object-position:top center}
+
+  /* SERVICES — STANDARD GRID (replaced horizontal scroll) */
+  .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+  .svc-slide{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px;transition:transform 0.3s,box-shadow 0.3s;position:relative;overflow:hidden}
+  .svc-slide:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.05)}
+  .svc-slide::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;border-radius:50%;background:rgba(217,119,6,0.03);transition:transform 0.4s}
+  .svc-slide:hover::before{transform:scale(2)}
+  .svc-slide-icon{font-size:2rem;margin-bottom:20px;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(217,119,6,0.06);border:1px solid rgba(217,119,6,0.1)}
+  .svc-slide h3{font-size:1.2rem;font-weight:700;margin-bottom:10px}
+  .svc-slide p{font-size:0.88rem;color:var(--muted);line-height:1.65}
+  .svc-tag{display:inline-block;margin-top:16px;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-family:'JetBrains Mono',monospace;background:rgba(217,119,6,0.06);color:var(--primary);border:1px solid rgba(217,119,6,0.1)}
+  /* Algo canvas behind service cards */
+  .algo-bg-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.4}
+  .svc-section-wrap{position:relative;overflow:hidden}
+
+  /* AUDIT / BIG NUMBER */
+  .audit-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .audit-inner{max-width:1200px;margin:0 auto;padding:100px 48px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+  .audit-inner h2{font-size:2rem;font-weight:800;margin-bottom:14px}
+  .audit-inner > div:first-child p{color:var(--muted);line-height:1.7;margin-bottom:16px}
+  .audit-list{list-style:none;margin-bottom:28px}
+  .audit-list li{display:flex;align-items:flex-start;gap:10px;font-size:0.92rem;margin-bottom:12px;color:#374151}
+  .audit-list .ck{color:var(--primary);font-weight:700}
+  .audit-visual{background:linear-gradient(135deg,rgba(217,119,6,0.04),rgba(234,88,12,0.02));border:1px solid var(--border);border-radius:20px;padding:56px;text-align:center}
+  .big-num{font-family:'JetBrains Mono',monospace;font-size:6rem;font-weight:900;color:var(--primary);line-height:1}
+  .big-label{font-size:0.85rem;color:var(--muted);margin-top:8px}
+
+  /* HOW (animated steps) */
+  .how-section{background:var(--bg)}
+  .how-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:48px;background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden}
+  .how-step{padding:44px 32px;border-right:1px solid var(--border);transition:background 0.3s}
+  .how-step:last-child{border-right:none}
+  .how-step:hover{background:rgba(217,119,6,0.02)}
+  .how-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--primary);letter-spacing:2px;margin-bottom:16px}
+  .how-step h3{font-size:1.05rem;font-weight:700;margin-bottom:10px}
+  .how-step p{font-size:0.84rem;color:var(--muted);line-height:1.6}
+
+  /* RESULTS */
+  .results-section{background:var(--surface);border-top:1px solid var(--border)}
+  .results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+  .result-card{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:36px;position:relative}
+  .result-card::before{content:'"';position:absolute;top:12px;left:24px;font-size:3rem;color:var(--primary);opacity:0.12;font-family:Georgia,serif;line-height:1}
+  .result-stars{color:var(--primary);font-size:0.8rem;margin-bottom:12px;letter-spacing:2px}
+  .result-text{font-size:0.88rem;color:var(--muted);line-height:1.7;margin-bottom:20px;font-style:italic}
+  .result-meta{display:flex;align-items:center;gap:12px}
+  .result-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;color:#fff}
+  .result-name{font-weight:600;font-size:0.82rem}
+  .result-role{font-size:0.72rem;color:var(--muted)}
+
+  /* CONTACT */
+  .contact-section{background:var(--surface);border-top:1px solid var(--border)}
+  .contact-inner{max-width:640px;margin:0 auto;text-align:center}
+  .contact-form{margin-top:36px;text-align:left}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .form-input{width:100%;padding:14px 20px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:0.9rem;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.3s}
+  .form-input:focus{border-color:var(--primary)}
+  .form-input::placeholder{color:#aaa}
+  select.form-input{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%236b7280'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:36px}
+  select.form-input option{background:var(--surface);color:var(--text)}
+  textarea.form-input{resize:vertical;min-height:90px}
+  .form-submit{margin-top:16px;width:100%;padding:16px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer;transition:transform 0.2s}
+  .form-submit:hover{transform:translateY(-1px);box-shadow:0 12px 32px var(--glow)}
+  .form-status{margin-top:14px;text-align:center;font-size:0.85rem;font-family:'JetBrains Mono',monospace}
+  .form-status.success{color:#16a34a}
+  .form-status.error{color:var(--accent)}
+
+  /* FOOTER */
+  footer{border-top:1px solid var(--border);padding:48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;font-size:0.82rem;color:var(--muted)}
+  footer a{color:var(--muted);text-decoration:none;transition:color 0.3s}
+  footer a:hover{color:var(--primary)}
+  .footer-links{display:flex;gap:24px}
+  .footer-brand{display:flex;align-items:center;gap:8px}
+
+  /* ALGO VISUALS */
+  .algo-grid-overlay{position:absolute;inset:0;pointer-events:none;z-index:0;
+    background-image:linear-gradient(rgba(217,119,6,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(217,119,6,0.03) 1px,transparent 1px);
+    background-size:40px 40px;
+    mask-image:radial-gradient(ellipse at center,black 20%,transparent 70%)}
+  .algo-bar-chart{display:flex;align-items:flex-end;gap:3px;height:80px;margin-top:20px}
+  .algo-bar{flex:1;background:linear-gradient(to top,var(--primary),rgba(217,119,6,0.2));border-radius:3px 3px 0 0;animation:algoGrow 2s ease-in-out infinite alternate;transform-origin:bottom}
+  @keyframes algoGrow{from{transform:scaleY(0.3)}to{transform:scaleY(1)}}
+  .algo-node-canvas{width:100%;height:200px;display:block}
+  .algo-score-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(217,119,6,0.06);border:1px solid rgba(217,119,6,0.1);font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--primary);font-weight:600}
+  .algo-ticker{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0;background:var(--surface);position:relative;z-index:2}
+  .algo-ticker-track{display:flex;animation:tickerScroll 20s linear infinite;width:max-content}
+  .algo-ticker-track span{white-space:nowrap;padding:0 32px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);letter-spacing:1px}
+  .algo-ticker-track .val{color:var(--primary);font-weight:700}
+  @keyframes tickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* RESPONSIVE */
+  @media(max-width:1024px){
+    .about-inner{grid-template-columns:1fr}
+    .about-photo{max-width:300px;margin:0 auto}
+    .audit-inner{grid-template-columns:1fr}
+    .services-grid{grid-template-columns:1fr 1fr}
+    .results-grid{grid-template-columns:1fr 1fr}
+    .how-steps{grid-template-columns:1fr 1fr}
+    .how-step:nth-child(2){border-right:none}
+  }
+  @media(max-width:768px){
+    nav{padding:0 20px}
+    .nav-right a:not(.nav-btn){display:none}
+    .hero-panel,.s-pad,.audit-inner{padding-left:20px;padding-right:20px}
+    .about-inner{padding:0 20px}
+    .services-grid,.results-grid{grid-template-columns:1fr}
+    .how-steps{grid-template-columns:1fr}
+    .how-step{border-right:none;border-bottom:1px solid var(--border)}
+    .how-step:last-child{border-bottom:none}
+    .hero-ctas{flex-direction:column}
+    .form-row{grid-template-columns:1fr}
+    footer{padding:32px 20px;flex-direction:column;text-align:center}
+  }
+</style>
+</head>
+<body>
+
+<!-- 3D CANVAS (fixed background) -->
+<canvas id="three-canvas"></canvas>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="index.html" class="nav-left"><svg class="logo-svg" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="12" fill="url(#sR1)"/><path d="M32 6 A26 26 0 0 1 58 32" stroke="url(#sR2)" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M32 58 A26 26 0 0 1 6 32" stroke="url(#sR3)" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="32" cy="6" r="3" fill="#fcd34d"/><circle cx="32" cy="58" r="3" fill="#ea580c"/><defs><radialGradient id="sR1" cx="0.4" cy="0.35" r="0.65"><stop stop-color="#fcd34d"/><stop offset="0.5" stop-color="#f59e0b"/><stop offset="1" stop-color="#ea580c"/></radialGradient><linearGradient id="sR2" x1="32" y1="6" x2="58" y2="32"><stop stop-color="#fcd34d"/><stop offset="1" stop-color="#f59e0b"/></linearGradient><linearGradient id="sR3" x1="32" y1="58" x2="6" y2="32"><stop stop-color="#ea580c"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs></svg><span class="nav-name">Solarium Marketing</span></a>
+  <div class="nav-right">
+    <a href="#services">Services</a>
+    <a href="algorithms.html">The Science</a>
+    <a href="services.html">Pricing</a>
+    <a href="#contact" class="nav-btn">Free Audit</a>
+  </div>
+</nav>
+
+<!-- HERO (full-screen, animated entrance) -->
+<section class="panel hero-panel" id="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow"><span class="dot"></span> San Diego, CA &middot; Now accepting clients</div>
+    <h1>Your brand<br>deserves to be <em>seen</em>.</h1>
+    <p class="hero-sub"> Solarium Marketing uses data science to decode how platform algorithms decide what gets seen. We build your marketing strategy — social, SEO, ads, content — around what the algorithms actually reward.</p>
+    <div class="hero-ctas">
+      <a href="#contact" class="btn btn-fill">Let's Chat — It's Free &#8594;</a>
+      <a href="#services" class="btn btn-outline">See How I Can Help</a>
+    </div>
+    <div class="hero-proof">
+      <div class="hero-proof-item"><span class="proof-num">347%</span><span class="proof-label">Avg. reach increase</span></div>
+      <div class="proof-divider"></div>
+      <div class="hero-proof-item"><span class="proof-num">2.4x</span><span class="proof-label">ROAS improvement</span></div>
+      <div class="proof-divider"></div>
+      <div class="hero-proof-item"><span class="proof-num">89M+</span><span class="proof-label">Impressions engineered</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about-section scroll-section" id="about">
+  <div class="about-inner">
+    <div class="about-text">
+      <div class="label">The Person Behind the Data</div>
+      <h2>Hey, I'm Cam.</h2>
+      <p>I started Solarium because I kept seeing the same thing: talented businesses creating great content that nobody was seeing. The problem wasn't the content — it was that <strong>nobody was paying attention to how the platforms actually decide what to show people.</strong></p>
+      <p>With a <strong>Master's in Data Science from Harvard</strong> and experience as a marketing strategist, I sit at the intersection of data and creativity. I genuinely love digging into the numbers and finding the "aha" moment that unlocks growth for a brand.</p>
+      <p>When I'm not building algorithm models, you'll find me somewhere near the ocean in San Diego. I'd love to hear about what you're building.</p>
+      <div class="credentials">
+        <span class="cred">&#x1f393; Harvard — Data Science, MA</span>
+        <span class="cred">&#x1f4ca; Python & SQL</span>
+        <span class="cred">&#x1f4cd; San Diego, CA</span>
+      </div>
+    </div>
+    <div class="about-photo">
+      <img src="cam.png" alt="Cameron Souza" loading="eager">
+    </div>
+  </div>
+</section>
+
+<!-- ALGO TICKER -->
+<div class="algo-ticker">
+  <div class="algo-ticker-track">
+    <span>ENGAGEMENT_VELOCITY <span class="val">+42%</span></span>
+    <span>WATCH_THROUGH_RATE <span class="val">0.87</span></span>
+    <span>SAVE_RATIO <span class="val">+18%</span></span>
+    <span>CTR_PREDICTION <span class="val">0.94</span></span>
+    <span>FEED_RANK_SCORE <span class="val">94.2</span></span>
+    <span>SESSION_TIME <span class="val">+3.1min</span></span>
+    <span>SHARE_DEPTH <span class="val">2.4x</span></span>
+    <span>E-E-A-T_SCORE <span class="val">0.91</span></span>
+    <span>ENGAGEMENT_VELOCITY <span class="val">+42%</span></span>
+    <span>WATCH_THROUGH_RATE <span class="val">0.87</span></span>
+    <span>SAVE_RATIO <span class="val">+18%</span></span>
+    <span>CTR_PREDICTION <span class="val">0.94</span></span>
+    <span>FEED_RANK_SCORE <span class="val">94.2</span></span>
+    <span>SESSION_TIME <span class="val">+3.1min</span></span>
+    <span>SHARE_DEPTH <span class="val">2.4x</span></span>
+    <span>E-E-A-T_SCORE <span class="val">0.91</span></span>
+  </div>
+</div>
+
+<!-- SERVICES (grid with algo backgrounds) -->
+<section id="services" class="scroll-section svc-section-wrap">
+  <div class="algo-grid-overlay"></div>
+  <div class="s-pad" style="position:relative;z-index:1;">
+    <div class="label">How I Help</div>
+    <h2 class="stitle">The full marketing toolkit,<br>with a data science edge.</h2>
+    <p class="sdesc" style="margin-bottom:48px;">I do all the things a great marketing partner should — social, SEO, ads, content, email, brand. The difference is that every decision I make is informed by what the algorithms are actually rewarding right now.</p>
+    <div class="services-grid">
+      <div class="svc-slide"><div class="svc-slide-icon">&#x1f310;</div><h3>Web Design & Development</h3><p>Your website is your home base. I'll design and build a site that looks great, loads fast, and is structured so search engines love it from day one.</p><span class="svc-tag">Data-informed</span></div>
+      <div class="svc-slide"><div class="svc-slide-icon">&#x1f4ca;</div><h3>Social Media Marketing</h3><p>I'll figure out what each platform's algorithm wants to see from your brand — then we'll build a content plan around it. No more posting and hoping.</p><span class="svc-tag">Data-informed</span></div>
+      <div class="svc-slide"><div class="svc-slide-icon">&#x1f3ac;</div><h3>Content Creation</h3><p>Video, graphics, copy, blogs — I'll produce the content your brand needs, optimized for the platforms you're on. Quality work that algorithms actually push.</p><span class="svc-tag">Data-informed</span></div>
+      <div class="svc-slide"><div class="svc-slide-icon">&#x1f50d;</div><h3>SEO & AI Search</h3><p>Google's always changing. I model what it's rewarding right now — trust signals, entity mapping, AI Overviews — so your content gets found.</p><span class="svc-tag">Data-informed</span></div>
+      <div class="svc-slide"><div class="svc-slide-icon">&#x1f4b0;</div><h3>Paid Ads</h3><p>Ad platforms have their own algorithms too. I find the patterns in auction dynamics so your budget works harder and reaches the right people.</p><span class="svc-tag">Data-informed</span></div>
+      <div class="svc-slide"><div class="svc-slide-icon">&#x1f4e7;</div><h3>Email Marketing</h3><p>Inbox placement is an algorithm — most people don't think about it that way. I'll help you land in inboxes, not spam folders, at the right time.</p><span class="svc-tag">Data-informed</span></div>
+      <div class="svc-slide"><div class="svc-slide-icon">&#x1f4c8;</div><h3>Brand Strategy</h3><p>Your brand identity should work for you across every channel. I'll help you build positioning and messaging that algorithms naturally want to surface.</p><span class="svc-tag">Data-informed</span></div>
+      <div class="svc-slide"><div class="svc-slide-icon">&#x1f4f1;</div><h3>Analytics & Reporting</h3><p>Custom dashboards that actually make sense. I'll track what matters, cut through vanity metrics, and show you exactly what's driving growth.</p><span class="svc-tag">Data-informed</span></div>
+      <div class="svc-slide"><div class="svc-slide-icon">&#x1f91d;</div><h3>Consulting & Training</h3><p>Want to learn how to think algorithmically yourself? I offer one-on-one consulting and team workshops to level up your marketing IQ.</p><span class="svc-tag">Data-informed</span></div>
+    </div>
+    <div style="text-align:center;margin-top:40px;">
+      <a href="services.html" class="btn btn-outline">View Full Services & Pricing &#8594;</a>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIT -->
+<section class="audit-section scroll-section">
+  <div class="audit-inner">
+    <div>
+      <div class="label">On the House</div>
+      <h2>Let's start with a free audit.</h2>
+      <p>Before we talk about anything else, I'll take a look at your current content and show you what's working, what's not, and what quick wins are sitting right in front of you. No sales pitch, just useful insight.</p>
+      <ul class="audit-list">
+        <li><span class="ck">&#10003;</span> How each platform's algorithm sees your content</li>
+        <li><span class="ck">&#10003;</span> The top signals you're currently missing</li>
+        <li><span class="ck">&#10003;</span> How you stack up against competitors</li>
+        <li><span class="ck">&#10003;</span> Quick wins you can act on right away</li>
+        <li><span class="ck">&#10003;</span> Zero commitment — it's genuinely free</li>
+      </ul>
+      <a href="#contact" class="btn btn-fill">Let's Take a Look &#8594;</a>
+    </div>
+    <div class="audit-visual">
+      <canvas class="algo-node-canvas" id="neuralCanvas"></canvas>
+      <div class="big-num" id="bigNum">0</div>
+      <div class="big-label">Average algo score after optimization</div>
+      <div class="algo-bar-chart" style="margin-top:24px;">
+        <div class="algo-bar" style="height:40%;animation-delay:0s"></div>
+        <div class="algo-bar" style="height:65%;animation-delay:0.1s"></div>
+        <div class="algo-bar" style="height:85%;animation-delay:0.2s"></div>
+        <div class="algo-bar" style="height:55%;animation-delay:0.3s"></div>
+        <div class="algo-bar" style="height:95%;animation-delay:0.4s"></div>
+        <div class="algo-bar" style="height:70%;animation-delay:0.5s"></div>
+        <div class="algo-bar" style="height:100%;animation-delay:0.6s"></div>
+        <div class="algo-bar" style="height:60%;animation-delay:0.7s"></div>
+        <div class="algo-bar" style="height:80%;animation-delay:0.8s"></div>
+        <div class="algo-bar" style="height:45%;animation-delay:0.9s"></div>
+        <div class="algo-bar" style="height:90%;animation-delay:1.0s"></div>
+        <div class="algo-bar" style="height:75%;animation-delay:1.1s"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section id="how" class="how-section scroll-section">
+  <div class="s-pad">
+    <div class="label">Working Together</div>
+    <h2 class="stitle">Here's what it looks like.</h2>
+    <div class="how-steps">
+      <div class="how-step"><div class="how-num">STEP 01</div><h3>We Talk</h3><p>I'll run a free audit on your content and we'll hop on a call to walk through what I find. No pressure, just clarity.</p></div>
+      <div class="how-step"><div class="how-num">STEP 02</div><h3>I Build Your Playbook</h3><p>I create custom models for your specific niche and platforms. This becomes the foundation for everything we do together.</p></div>
+      <div class="how-step"><div class="how-num">STEP 03</div><h3>We Launch</h3><p>I execute your marketing — content, ads, SEO, social — all informed by the model. You'll see exactly what's happening and why.</p></div>
+      <div class="how-step"><div class="how-num">STEP 04</div><h3>We Keep Growing</h3><p>Algorithms change all the time. I keep my finger on the pulse so your strategy evolves with them. No scrambling.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results" class="results-section scroll-section">
+  <div class="s-pad">
+    <div class="label">Kind Words</div>
+    <h2 class="stitle">What clients are saying.</h2>
+    <div class="results-grid">
+      <div class="result-card"><div class="result-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="result-text">Cam showed us which TikTok signals were throttling our content. Our FYP rate went from 8% to 67% in six weeks.</div><div class="result-meta"><div class="result-av">JR</div><div><div class="result-name">Jamie Rodriguez</div><div class="result-role">Head of Growth, NovaBrand</div></div></div></div>
+      <div class="result-card"><div class="result-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="result-text">He predicted a YouTube algorithm shift two weeks early. We gained subscribers while competitors lost them.</div><div class="result-meta"><div class="result-av">SK</div><div><div class="result-name">Sarah Kim</div><div class="result-role">CMO, Elevate Studios</div></div></div></div>
+      <div class="result-card"><div class="result-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="result-text">18 months stagnant on Google. Cam found the missing trust signals. Page one for 34 new keywords in Q1.</div><div class="result-meta"><div class="result-av">MT</div><div><div class="result-name">Marcus Thompson</div><div class="result-role">VP Digital, Apex Health</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact-section scroll-section">
+  <div class="s-pad">
+    <div class="contact-inner">
+      <div class="label">Say Hi</div>
+      <h2 class="stitle">I'd love to hear about what you're working on.</h2>
+      <p class="sdesc" style="margin:0 auto 0;">Drop me a note and I'll get back to you within a day. If you want the free audit, just say so — I'll have it ready within 48 hours.</p>
+      <form class="contact-form" action="https://formspree.io/f/xlgpzooe" method="POST">
+        <input type="hidden" name="_subject" value="New Solarium Marketing Lead">
+        <div class="form-row">
+          <input type="text" name="name" class="form-input" placeholder="Your name" required>
+          <input type="email" name="email" class="form-input" placeholder="Your email" required>
+        </div>
+        <div class="form-row">
+          <input type="text" name="company" class="form-input" placeholder="Company / brand">
+          <input type="url" name="website" class="form-input" placeholder="Website URL (optional)">
+        </div>
+        <select name="interest" class="form-input" style="width:100%;margin-bottom:12px" required>
+          <option value="" disabled selected>What do you need help with?</option>
+          <option value="Free Algorithm Audit">Free Algorithm Audit</option>
+          <option value="Social Media Marketing">Social Media Marketing</option>
+          <option value="SEO & AI Search">SEO & AI Search</option>
+          <option value="Paid Advertising">Paid Advertising</option>
+          <option value="Content Strategy">Content Strategy</option>
+          <option value="Full Service">Full-Service Marketing</option>
+          <option value="Not sure yet">Not sure yet</option>
+        </select>
+        <textarea name="message" class="form-input" placeholder="Tell me about your goals..." rows="4"></textarea>
+        <button type="submit" class="form-submit">Send It Over</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">
+    <svg style="width:20px;height:20px" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="12" fill="#f59e0b"/><path d="M32 6 A26 26 0 0 1 58 32" stroke="#fbbf24" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M32 58 A26 26 0 0 1 6 32" stroke="#ea580c" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+    <span style="color:var(--text);font-weight:700">Solarium Marketing</span>
+    <span>&middot; &copy; 2026 &middot; A Solarium Holdings company</span>
+  </div>
+  <div class="footer-links">
+    <a href="services.html">Services</a>
+    <a href="#contact">Contact</a>
+    <a href="services.html">Pricing</a>
+  </div>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// ── THREE.JS 3D BACKGROUND ──
+const canvas3d = document.getElementById('three-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: canvas3d, alpha: true, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.z = 5;
+
+// Warm lighting
+const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.6);
+scene.add(ambientLight);
+const dirLight = new THREE.DirectionalLight(0xf59e0b, 0.8);
+dirLight.position.set(3, 5, 4);
+scene.add(dirLight);
+const pointLight = new THREE.PointLight(0xea580c, 0.4, 20);
+pointLight.position.set(-3, 2, 3);
+scene.add(pointLight);
+
+// Create geometric shapes
+const shapes = [];
+const geo1 = new THREE.IcosahedronGeometry(0.8, 1);
+const geo2 = new THREE.OctahedronGeometry(0.5, 0);
+const geo3 = new THREE.TorusGeometry(0.6, 0.2, 16, 32);
+const geo4 = new THREE.DodecahedronGeometry(0.4, 0);
+const geo5 = new THREE.TetrahedronGeometry(0.5, 0);
+
+const matWire = new THREE.MeshPhongMaterial({ color: 0xd97706, wireframe: true, transparent: true, opacity: 0.2 });
+const matSolid = new THREE.MeshPhongMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.08, shininess: 100 });
+
+function addShape(geo, x, y, z, wire) {
+  const mesh = new THREE.Mesh(geo, wire ? matWire : matSolid);
+  mesh.position.set(x, y, z);
+  mesh.userData = { baseY: y, speed: 0.3 + Math.random() * 0.5, rotSpeed: 0.002 + Math.random() * 0.005 };
+  scene.add(mesh);
+  shapes.push(mesh);
+  return mesh;
+}
+
+const mainSphere = addShape(geo1, 2.5, 0, 0, true);
+addShape(geo2, -3, 1.5, -1, false);
+addShape(geo3, 3.5, -2, -2, true);
+addShape(geo4, -2.5, -1, 1, false);
+addShape(geo5, 1, 2.5, -1.5, true);
+addShape(new THREE.IcosahedronGeometry(0.3, 0), -1, -2.5, 0, false);
+addShape(new THREE.OctahedronGeometry(0.35, 0), 4, 1, -3, true);
+
+// Scroll-driven camera and shape movement
+let scrollProgress = 0;
+ScrollTrigger.create({
+  trigger: 'body',
+  start: 'top top',
+  end: 'bottom bottom',
+  onUpdate: (self) => { scrollProgress = self.progress; }
+});
+
+function animate3D() {
+  requestAnimationFrame(animate3D);
+  const t = Date.now() * 0.001;
+  shapes.forEach((s, i) => {
+    s.rotation.x += s.userData.rotSpeed;
+    s.rotation.y += s.userData.rotSpeed * 1.3;
+    s.position.y = s.userData.baseY + Math.sin(t * s.userData.speed + i) * 0.3;
+  });
+  // Move camera based on scroll
+  camera.position.y = -scrollProgress * 3;
+  camera.position.x = Math.sin(scrollProgress * Math.PI) * 0.5;
+  mainSphere.rotation.y = scrollProgress * Math.PI * 2;
+  mainSphere.scale.setScalar(1 + scrollProgress * 0.5);
+  renderer.render(scene, camera);
+}
+animate3D();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ── HERO ENTRANCE ANIMATIONS ──
+const heroTL = gsap.timeline({ delay: 0.3 });
+heroTL.to('.hero-eyebrow', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' })
+  .to('.hero-content h1', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, '-=0.5')
+  .to('.hero-sub', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
+  .to('.hero-ctas', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.4')
+  .to('.hero-proof', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.4');
+
+// ── ABOUT SECTION REVEAL ──
+gsap.fromTo('.about-text', { x: -50, opacity: 0 }, {
+  x: 0, opacity: 1, duration: 1, ease: 'power3.out',
+  scrollTrigger: { trigger: '.about-section', start: 'top 60%' }
+});
+gsap.fromTo('.about-photo', { x: 50, opacity: 0, scale: 0.95 }, {
+  x: 0, opacity: 1, scale: 1, duration: 1, ease: 'power3.out',
+  scrollTrigger: { trigger: '.about-section', start: 'top 60%' }
+});
+
+// ── SERVICES GRID STAGGER ──
+gsap.utils.toArray('.svc-slide').forEach((el, i) => {
+  gsap.fromTo(el, { y: 50, opacity: 0, scale: 0.95 }, {
+    y: 0, opacity: 1, scale: 1, duration: 0.7, delay: i * 0.1,
+    ease: 'power3.out',
+    scrollTrigger: { trigger: '.services-grid', start: 'top 75%' }
+  });
+});
+
+// ── NEURAL NETWORK CANVAS ──
+const neuralCanvas = document.getElementById('neuralCanvas');
+if (neuralCanvas) {
+  const nCtx = neuralCanvas.getContext('2d');
+  let nRunning = false;
+  function drawNeural() {
+    if (!nRunning) return;
+    const w = neuralCanvas.width = neuralCanvas.parentElement.offsetWidth;
+    const h = neuralCanvas.height = 200;
+    nCtx.clearRect(0, 0, w, h);
+    const t = Date.now() * 0.001;
+    const layers = [4, 6, 6, 3];
+    const nodes = [];
+    layers.forEach((count, li) => {
+      const layerNodes = [];
+      const x = (li / (layers.length - 1)) * (w - 60) + 30;
+      for (let ni = 0; ni < count; ni++) {
+        const y = ((ni + 1) / (count + 1)) * h;
+        layerNodes.push({ x, y });
+      }
+      nodes.push(layerNodes);
+    });
+    // Draw connections
+    for (let li = 0; li < nodes.length - 1; li++) {
+      nodes[li].forEach((n1, i) => {
+        nodes[li + 1].forEach((n2, j) => {
+          const pulse = Math.sin(t * 2 + i + j + li) * 0.5 + 0.5;
+          nCtx.beginPath();
+          nCtx.moveTo(n1.x, n1.y);
+          nCtx.lineTo(n2.x, n2.y);
+          nCtx.strokeStyle = `rgba(217,119,6,${0.06 + pulse * 0.12})`;
+          nCtx.lineWidth = 1;
+          nCtx.stroke();
+        });
+      });
+    }
+    // Draw nodes
+    nodes.forEach((layer, li) => {
+      layer.forEach((n, ni) => {
+        const pulse = Math.sin(t * 3 + ni + li * 2) * 0.3 + 0.7;
+        nCtx.beginPath();
+        nCtx.arc(n.x, n.y, 4 + pulse * 3, 0, Math.PI * 2);
+        nCtx.fillStyle = `rgba(217,119,6,${0.2 + pulse * 0.4})`;
+        nCtx.fill();
+        // Glow
+        nCtx.beginPath();
+        nCtx.arc(n.x, n.y, 8 + pulse * 4, 0, Math.PI * 2);
+        nCtx.fillStyle = `rgba(217,119,6,${0.03 + pulse * 0.05})`;
+        nCtx.fill();
+      });
+    });
+    requestAnimationFrame(drawNeural);
+  }
+  const nObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { nRunning = e.isIntersecting; if (nRunning) drawNeural(); });
+  });
+  nObs.observe(neuralCanvas);
+}
+
+// ── BIG NUMBER COUNTER ──
+gsap.fromTo('#bigNum', { innerText: 0 }, {
+  innerText: 94.2,
+  duration: 2,
+  snap: { innerText: 0.1 },
+  scrollTrigger: { trigger: '.audit-visual', start: 'top 70%' },
+  onUpdate: function() {
+    document.getElementById('bigNum').textContent = parseFloat(gsap.getProperty('#bigNum', 'innerText')).toFixed(1);
+  }
+});
+
+// ── SCROLL REVEALS (all sections) ──
+gsap.utils.toArray('.how-step').forEach((el, i) => {
+  gsap.fromTo(el, { y: 40, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.7, delay: i * 0.1,
+    scrollTrigger: { trigger: el, start: 'top 80%' }
+  });
+});
+
+gsap.utils.toArray('.result-card').forEach((el, i) => {
+  gsap.fromTo(el, { y: 50, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.7, delay: i * 0.15,
+    scrollTrigger: { trigger: el, start: 'top 80%' }
+  });
+});
+
+gsap.utils.toArray('.audit-inner > div').forEach((el, i) => {
+  gsap.fromTo(el, { y: 40, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.8, delay: i * 0.2,
+    scrollTrigger: { trigger: '.audit-section', start: 'top 60%' }
+  });
+});
+
+gsap.utils.toArray('.s-pad .label, .s-pad .stitle, .s-pad .sdesc').forEach(el => {
+  gsap.fromTo(el, { y: 30, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.7,
+    scrollTrigger: { trigger: el, start: 'top 85%' }
+  });
+});
+
+// Contact form reveal
+gsap.fromTo('.contact-inner', { y: 40, opacity: 0 }, {
+  y: 0, opacity: 1, duration: 0.8,
+  scrollTrigger: { trigger: '.contact-section', start: 'top 60%' }
+});
+
+// ── NAV HIDE ON SCROLL ──
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+  const c = window.scrollY;
+  document.getElementById('nav').classList.toggle('hide', c > lastScroll && c > 80);
+  lastScroll = c;
+});
+
+// ── SMOOTH SCROLL ──
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>
