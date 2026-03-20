@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Studies — Solarium Marketing</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#faf9f7; --surface:#fff; --card:#fff;
+    --border:rgba(0,0,0,0.07);
+    --primary:#d97706; --primary-light:#f59e0b; --accent:#ea580c;
+    --text:#1a1a1a; --muted:#6b7280;
+    --glow:rgba(217,119,6,0.15);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{overflow-x:hidden;scroll-behavior:smooth}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(16px);background:rgba(250,249,247,0.88);border-bottom:1px solid var(--border);transition:transform 0.4s}
+  nav.hide{transform:translateY(-100%)}
+  .nav-left{display:flex;align-items:center;gap:8px;text-decoration:none}
+  .logo-svg{width:32px;height:32px;flex-shrink:0}
+  .nav-name{font-weight:800;font-size:1.15rem;color:var(--text)}
+  .nav-right{display:flex;align-items:center;gap:32px}
+  .nav-right a{color:var(--muted);text-decoration:none;font-size:0.88rem;font-weight:500;transition:color 0.3s}
+  .nav-right a:hover{color:var(--text)}
+  .nav-btn{padding:9px 24px;background:var(--primary);color:#fff!important;border-radius:8px;font-weight:700;font-size:0.84rem;text-decoration:none;transition:transform 0.2s}
+  .nav-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px var(--glow)}
+
+  /* 3D CANVAS */
+  #three-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none}
+
+  /* SHARED */
+  .scroll-section{position:relative;z-index:2}
+  .s-pad{padding:120px 48px;max-width:1200px;margin:0 auto}
+  .label{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--primary);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px}
+  .stitle{font-size:clamp(2rem,4vw,3.2rem);font-weight:800;letter-spacing:-1px;line-height:1.1;margin-bottom:16px}
+  .sdesc{font-size:1rem;color:var(--muted);line-height:1.7;max-width:520px}
+  .btn{padding:16px 36px;border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:none}
+  .btn-fill{background:var(--primary);color:#fff}
+  .btn-fill:hover{transform:translateY(-2px);box-shadow:0 12px 32px var(--glow)}
+  .btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .btn-outline:hover{border-color:var(--primary)}
+
+  /* ALGO VISUALS */
+  .algo-grid-overlay{position:absolute;inset:0;pointer-events:none;z-index:0;
+    background-image:linear-gradient(rgba(217,119,6,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(217,119,6,0.03) 1px,transparent 1px);
+    background-size:40px 40px;
+    mask-image:radial-gradient(ellipse at center,black 20%,transparent 70%)}
+  .algo-ticker{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0;background:var(--surface);position:relative;z-index:2}
+  .algo-ticker-track{display:flex;animation:tickerScroll 20s linear infinite;width:max-content}
+  .algo-ticker-track span{white-space:nowrap;padding:0 32px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);letter-spacing:1px}
+  .algo-ticker-track .val{color:var(--primary);font-weight:700}
+  @keyframes tickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* HERO */
+  .hero-section{min-height:60vh;display:flex;align-items:center;padding:140px 48px 80px;position:relative;z-index:2}
+  .hero-inner{max-width:700px}
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:0.78rem;font-weight:600;color:var(--primary);margin-bottom:24px;opacity:0}
+  .hero-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--primary);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,119,6,0.4)}50%{box-shadow:0 0 0 8px rgba(217,119,6,0)}}
+  .hero-section h1{font-size:clamp(2.8rem,5.5vw,4.5rem);font-weight:900;line-height:1.05;letter-spacing:-2.5px;opacity:0}
+  .hero-section h1 em{font-style:normal;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero-sub{font-size:1.15rem;color:var(--muted);line-height:1.75;margin:24px 0 36px;max-width:520px;opacity:0}
+  .hero-proof{display:flex;align-items:center;gap:24px;margin-top:40px;opacity:0}
+  .hero-proof-item{display:flex;flex-direction:column}
+  .proof-num{font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:800;color:var(--primary)}
+  .proof-label{font-size:0.72rem;color:var(--muted)}
+  .proof-divider{width:1px;height:40px;background:var(--border)}
+
+  /* CASE STUDY CARDS (overview grid) */
+  .cs-overview{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .cs-overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+  .cs-overview-card{background:var(--bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:transform 0.3s,box-shadow 0.3s;cursor:pointer;text-decoration:none;color:var(--text)}
+  .cs-overview-card:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(0,0,0,0.06)}
+  .cs-card-header{padding:28px 28px 20px;border-bottom:1px solid var(--border)}
+  .cs-card-industry{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--primary);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+  .cs-card-header h3{font-size:1.2rem;font-weight:700;margin-bottom:6px}
+  .cs-card-header p{font-size:0.84rem;color:var(--muted);line-height:1.6}
+  .cs-card-metrics{padding:20px 28px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .cs-metric{display:flex;flex-direction:column}
+  .cs-metric-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:800;color:var(--primary)}
+  .cs-metric-label{font-size:0.68rem;color:var(--muted);margin-top:2px}
+  .cs-card-footer{padding:16px 28px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .cs-card-footer span{font-size:0.82rem;font-weight:600;color:var(--primary)}
+  .cs-card-footer .arrow{font-size:1.1rem}
+
+  /* FULL CASE STUDY SECTIONS */
+  .case-study{border-top:1px solid var(--border)}
+  .case-study:nth-child(even){background:var(--surface)}
+  .cs-inner{max-width:1200px;margin:0 auto;padding:100px 48px}
+  .cs-header{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;margin-bottom:60px}
+  .cs-label-row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .cs-number{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--primary);letter-spacing:3px;text-transform:uppercase;padding:4px 12px;border-radius:6px;background:rgba(217,119,6,0.06);border:1px solid rgba(217,119,6,0.1)}
+  .cs-industry-tag{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .cs-header h2{font-size:2rem;font-weight:800;line-height:1.15;margin-bottom:14px}
+  .cs-header h2 em{font-style:normal;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .cs-header p{color:var(--muted);line-height:1.75;font-size:0.95rem;margin-bottom:12px}
+
+  .cs-stats-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px;position:relative;overflow:hidden}
+  .cs-stats-card::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(217,119,6,0.04)}
+  .cs-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .cs-stat{display:flex;flex-direction:column}
+  .cs-stat-num{font-family:'JetBrains Mono',monospace;font-size:2.4rem;font-weight:900;color:var(--primary);line-height:1}
+  .cs-stat-label{font-size:0.78rem;color:var(--muted);margin-top:6px;line-height:1.4}
+  .cs-stat-bar{margin-top:8px;height:4px;border-radius:2px;background:rgba(217,119,6,0.1);overflow:hidden}
+  .cs-stat-bar-fill{height:100%;border-radius:2px;background:linear-gradient(to right,var(--primary),var(--accent));transform-origin:left;transform:scaleX(0)}
+
+  /* Challenge / Strategy / Results breakdown */
+  .cs-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .cs-break-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;position:relative}
+  .cs-break-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
+  .cs-break-card.challenge::before{background:var(--accent)}
+  .cs-break-card.strategy::before{background:var(--primary)}
+  .cs-break-card.results::before{background:#16a34a}
+  .cs-break-label{font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;font-weight:600}
+  .cs-break-card.challenge .cs-break-label{color:var(--accent)}
+  .cs-break-card.strategy .cs-break-label{color:var(--primary)}
+  .cs-break-card.results .cs-break-label{color:#16a34a}
+  .cs-break-card p{font-size:0.88rem;color:var(--muted);line-height:1.7}
+  .cs-break-card ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+  .cs-break-card li{font-size:0.86rem;color:var(--muted);line-height:1.6;padding-left:18px;position:relative}
+  .cs-break-card.challenge li::before{content:'•';position:absolute;left:0;color:var(--accent);font-weight:700}
+  .cs-break-card.strategy li::before{content:'→';position:absolute;left:0;color:var(--primary);font-weight:700}
+  .cs-break-card.results li::before{content:'✓';position:absolute;left:0;color:#16a34a;font-weight:700}
+
+  /* Algo bar chart in case studies */
+  .cs-algo-chart{display:flex;align-items:flex-end;gap:3px;height:60px;margin-top:20px}
+  .cs-algo-bar{flex:1;background:linear-gradient(to top,var(--primary),rgba(217,119,6,0.2));border-radius:3px 3px 0 0;transition:height 1s ease}
+
+  /* Quote in case study */
+  .cs-quote{margin-top:40px;padding:32px;background:var(--card);border:1px solid var(--border);border-radius:16px;position:relative}
+  .cs-quote::before{content:'"';position:absolute;top:8px;left:20px;font-size:3.5rem;color:var(--primary);opacity:0.1;font-family:Georgia,serif;line-height:1}
+  .cs-quote-text{font-size:1rem;color:var(--muted);line-height:1.75;font-style:italic;margin-bottom:16px;padding-left:24px}
+  .cs-quote-meta{display:flex;align-items:center;gap:12px;padding-left:24px}
+  .cs-quote-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:#fff}
+  .cs-quote-name{font-weight:600;font-size:0.88rem}
+  .cs-quote-role{font-size:0.75rem;color:var(--muted)}
+
+  /* PROCESS SECTION */
+  .process-section{background:var(--bg);border-top:1px solid var(--border)}
+  .process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:48px;background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden}
+  .process-step{padding:44px 32px;border-right:1px solid var(--border);transition:background 0.3s}
+  .process-step:last-child{border-right:none}
+  .process-step:hover{background:rgba(217,119,6,0.02)}
+  .process-num{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--primary);letter-spacing:2px;margin-bottom:16px}
+  .process-step h3{font-size:1.05rem;font-weight:700;margin-bottom:10px}
+  .process-step p{font-size:0.84rem;color:var(--muted);line-height:1.6}
+
+  /* TESTIMONIALS */
+  .testimonials-section{background:var(--surface);border-top:1px solid var(--border)}
+  .testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+  .testimonial-card{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:36px;position:relative}
+  .testimonial-card::before{content:'"';position:absolute;top:12px;left:24px;font-size:3rem;color:var(--primary);opacity:0.12;font-family:Georgia,serif;line-height:1}
+  .testimonial-stars{color:var(--primary);font-size:0.8rem;margin-bottom:12px;letter-spacing:2px}
+  .testimonial-text{font-size:0.88rem;color:var(--muted);line-height:1.7;margin-bottom:20px;font-style:italic}
+  .testimonial-meta{display:flex;align-items:center;gap:12px}
+  .testimonial-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;color:#fff}
+  .testimonial-name{font-weight:600;font-size:0.82rem}
+  .testimonial-role{font-size:0.72rem;color:var(--muted)}
+
+  /* RESULTS AGGREGATE */
+  .results-agg{border-top:1px solid var(--border)}
+  .results-agg-inner{max-width:1200px;margin:0 auto;padding:100px 48px;text-align:center}
+  .agg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px}
+  .agg-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:36px}
+  .agg-num{font-family:'JetBrains Mono',monospace;font-size:2.6rem;font-weight:900;color:var(--primary);line-height:1}
+  .agg-label{font-size:0.82rem;color:var(--muted);margin-top:8px;line-height:1.4}
+
+  /* CTA */
+  .cta-section{background:var(--surface);border-top:1px solid var(--border)}
+  .cta-inner{max-width:640px;margin:0 auto;text-align:center}
+  .cta-inner .stitle{margin-bottom:14px}
+  .cta-inner .sdesc{margin:0 auto 36px;max-width:480px}
+  .cta-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+  /* FOOTER */
+  footer{border-top:1px solid var(--border);padding:48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;font-size:0.82rem;color:var(--muted);position:relative;z-index:2}
+  footer a{color:var(--muted);text-decoration:none;transition:color 0.3s}
+  footer a:hover{color:var(--primary)}
+  .footer-links{display:flex;gap:24px}
+  .footer-brand{display:flex;align-items:center;gap:8px}
+
+  /* RESPONSIVE */
+  @media(max-width:1024px){
+    .cs-header{grid-template-columns:1fr}
+    .cs-overview-grid{grid-template-columns:1fr 1fr}
+    .cs-breakdown{grid-template-columns:1fr}
+    .process-steps{grid-template-columns:1fr 1fr}
+    .process-step:nth-child(2){border-right:none}
+    .testimonials-grid{grid-template-columns:1fr 1fr}
+    .agg-grid{grid-template-columns:1fr 1fr}
+  }
+  @media(max-width:768px){
+    nav{padding:0 20px}
+    .nav-right a:not(.nav-btn){display:none}
+    .hero-section,.s-pad,.cs-inner{padding-left:20px;padding-right:20px}
+    .cs-overview-grid,.cs-breakdown,.testimonials-grid{grid-template-columns:1fr}
+    .process-steps{grid-template-columns:1fr}
+    .process-step{border-right:none;border-bottom:1px solid var(--border)}
+    .process-step:last-child{border-bottom:none}
+    .agg-grid{grid-template-columns:1fr 1fr}
+    .hero-proof{flex-wrap:wrap;gap:16px}
+    footer{padding:32px 20px;flex-direction:column;text-align:center}
+    .results-agg-inner{padding:80px 20px}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="three-canvas"></canvas>
+
+<!-- NAV (identical to main site) -->
+<nav id="nav">
+  <a href="index.html" class="nav-left"><svg class="logo-svg" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="12" fill="url(#sR1)"/><path d="M32 6 A26 26 0 0 1 58 32" stroke="url(#sR2)" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M32 58 A26 26 0 0 1 6 32" stroke="url(#sR3)" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="32" cy="6" r="3" fill="#fcd34d"/><circle cx="32" cy="58" r="3" fill="#ea580c"/><defs><radialGradient id="sR1" cx="0.4" cy="0.35" r="0.65"><stop stop-color="#fcd34d"/><stop offset="0.5" stop-color="#f59e0b"/><stop offset="1" stop-color="#ea580c"/></radialGradient><linearGradient id="sR2" x1="32" y1="6" x2="58" y2="32"><stop stop-color="#fcd34d"/><stop offset="1" stop-color="#f59e0b"/></linearGradient><linearGradient id="sR3" x1="32" y1="58" x2="6" y2="32"><stop stop-color="#ea580c"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs></svg><span class="nav-name">Solarium Marketing</span></a>
+  <div class="nav-right">
+    <a href="index.html#services">Services</a>
+    <a href="algorithms.html">The Science</a>
+    <a href="services.html">Pricing</a>
+    <a href="case-studies.html" style="color:var(--text)">Case Studies</a>
+    <a href="index.html#contact" class="nav-btn">Free Audit</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-section scroll-section">
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span class="dot"></span> Real clients, real algorithms, real results</div>
+    <h1>Case<br><em>Studies</em></h1>
+    <p class="hero-sub">We don't talk in hypotheticals. Here's exactly how we decoded platform algorithms and turned invisible brands into industry leaders — with the data to prove it.</p>
+    <div class="hero-proof">
+      <div class="hero-proof-item"><span class="proof-num">3</span><span class="proof-label">Featured case studies</span></div>
+      <div class="proof-divider"></div>
+      <div class="hero-proof-item"><span class="proof-num">$4.2M</span><span class="proof-label">Combined rev. generated</span></div>
+      <div class="proof-divider"></div>
+      <div class="hero-proof-item"><span class="proof-num">347%</span><span class="proof-label">Avg. reach increase</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ALGO TICKER -->
+<div class="algo-ticker">
+  <div class="algo-ticker-track">
+    <span>CASE_01 <span class="val">+412% reach</span></span>
+    <span>CASE_02 <span class="val">3.1x ROAS</span></span>
+    <span>CASE_03 <span class="val">+890% organic</span></span>
+    <span>SEO_RANK_DELTA <span class="val">+47 positions</span></span>
+    <span>SOCIAL_VELOCITY <span class="val">+267%</span></span>
+    <span>EMAIL_PLACEMENT <span class="val">98.4%</span></span>
+    <span>CONVERSION_LIFT <span class="val">+156%</span></span>
+    <span>ALGO_SCORE_AVG <span class="val">94.2</span></span>
+    <span>CASE_01 <span class="val">+412% reach</span></span>
+    <span>CASE_02 <span class="val">3.1x ROAS</span></span>
+    <span>CASE_03 <span class="val">+890% organic</span></span>
+    <span>SEO_RANK_DELTA <span class="val">+47 positions</span></span>
+    <span>SOCIAL_VELOCITY <span class="val">+267%</span></span>
+    <span>EMAIL_PLACEMENT <span class="val">98.4%</span></span>
+    <span>CONVERSION_LIFT <span class="val">+156%</span></span>
+    <span>ALGO_SCORE_AVG <span class="val">94.2</span></span>
+  </div>
+</div>
+
+<!-- CASE STUDY OVERVIEW CARDS -->
+<section class="cs-overview scroll-section">
+  <div class="s-pad">
+    <div class="label">The Work</div>
+    <h2 class="stitle">Three stories. Three algorithms.<br>Three transformations.</h2>
+    <p class="sdesc" style="margin-bottom:0;">Each case study follows the same core approach: model the algorithm, find the gaps, build a strategy around what the platform actually rewards, and measure everything.</p>
+    <div class="cs-overview-grid">
+      <a href="#case-1" class="cs-overview-card">
+        <div class="cs-card-header">
+          <div class="cs-card-industry">Fitness & Wellness</div>
+          <h3>Voltra Fitness Co.</h3>
+          <p>A boutique fitness studio drowning in a saturated Instagram market. Algorithm modeling unlocked a content strategy competitors couldn't see.</p>
+        </div>
+        <div class="cs-card-metrics">
+          <div class="cs-metric"><span class="cs-metric-num">412%</span><span class="cs-metric-label">Reach increase</span></div>
+          <div class="cs-metric"><span class="cs-metric-num">$1.2M</span><span class="cs-metric-label">Revenue generated</span></div>
+          <div class="cs-metric"><span class="cs-metric-num">67%</span><span class="cs-metric-label">FYP rate (from 8%)</span></div>
+          <div class="cs-metric"><span class="cs-metric-num">14K</span><span class="cs-metric-label">New members</span></div>
+        </div>
+        <div class="cs-card-footer"><span>Read full study</span><span class="arrow">→</span></div>
+      </a>
+
+      <a href="#case-2" class="cs-overview-card">
+        <div class="cs-card-header">
+          <div class="cs-card-industry">E-Commerce / DTC</div>
+          <h3>Sunchasers Supply</h3>
+          <p>A SoCal outdoor brand burning cash on paid ads with diminishing returns. We rebuilt their entire acquisition funnel around algorithm signals.</p>
+        </div>
+        <div class="cs-card-metrics">
+          <div class="cs-metric"><span class="cs-metric-num">3.1x</span><span class="cs-metric-label">ROAS improvement</span></div>
+          <div class="cs-metric"><span class="cs-metric-num">$1.8M</span><span class="cs-metric-label">Revenue in 6 months</span></div>
+          <div class="cs-metric"><span class="cs-metric-num">-42%</span><span class="cs-metric-label">Cost per acquisition</span></div>
+          <div class="cs-metric"><span class="cs-metric-num">156%</span><span class="cs-metric-label">Conversion rate lift</span></div>
+        </div>
+        <div class="cs-card-footer"><span>Read full study</span><span class="arrow">→</span></div>
+      </a>
+
+      <a href="#case-3" class="cs-overview-card">
+        <div class="cs-card-header">
+          <div class="cs-card-industry">B2B SaaS</div>
+          <h3>Trellix Insights</h3>
+          <p>An analytics platform invisible on Google despite strong content. We decoded the missing trust signals and rebuilt their SEO from the ground up.</p>
+        </div>
+        <div class="cs-card-metrics">
+          <div class="cs-metric"><span class="cs-metric-num">890%</span><span class="cs-metric-label">Organic traffic growth</span></div>
+          <div class="cs-metric"><span class="cs-metric-num">$1.2M</span><span class="cs-metric-label">Pipeline generated</span></div>
+          <div class="cs-metric"><span class="cs-metric-num">47</span><span class="cs-metric-label">Page 1 keywords gained</span></div>
+          <div class="cs-metric"><span class="cs-metric-num">4.8x</span><span class="cs-metric-label">Lead volume increase</span></div>
+        </div>
+        <div class="cs-card-footer"><span>Read full study</span><span class="arrow">→</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CASE STUDY 1: APEX PERFORMANCE LAB                  -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="case-study scroll-section" id="case-1">
+  <div class="cs-inner">
+    <div class="cs-header">
+      <div>
+        <div class="cs-label-row">
+          <span class="cs-number">Case 01</span>
+          <span class="cs-industry-tag">Fitness & Wellness</span>
+        </div>
+        <h2>Voltra Fitness Co.:<br>From invisible to <em>unavoidable</em>.</h2>
+        <p>Voltra Fitness Co. is a premium functional fitness studio on the West Coast. They had world-class coaches, stunning facilities, and content that looked incredible — but their social media reach had plateaued hard.</p>
+        <p>Their Instagram was averaging 200 impressions per post. Their TikToks were hitting the FYP just 8% of the time. They were creating five pieces of content a week and getting almost nothing in return.</p>
+        <p><strong>The problem wasn't the content. The problem was that the content wasn't optimized for what each platform's algorithm was actually rewarding.</strong></p>
+      </div>
+      <div class="cs-stats-card">
+        <div class="label" style="margin-bottom:20px">Key Results</div>
+        <div class="cs-stats-grid">
+          <div class="cs-stat">
+            <span class="cs-stat-num" data-target="412">0%</span>
+            <span class="cs-stat-label">Reach increase</span>
+            <div class="cs-stat-bar"><div class="cs-stat-bar-fill" data-width="92%"></div></div>
+          </div>
+          <div class="cs-stat">
+            <span class="cs-stat-num">$1.2M</span>
+            <span class="cs-stat-label">Revenue generated</span>
+            <div class="cs-stat-bar"><div class="cs-stat-bar-fill" data-width="85%"></div></div>
+          </div>
+          <div class="cs-stat">
+            <span class="cs-stat-num">67%</span>
+            <span class="cs-stat-label">TikTok FYP rate</span>
+            <div class="cs-stat-bar"><div class="cs-stat-bar-fill" data-width="67%"></div></div>
+          </div>
+          <div class="cs-stat">
+            <span class="cs-stat-num">14K</span>
+            <span class="cs-stat-label">New member signups</span>
+            <div class="cs-stat-bar"><div class="cs-stat-bar-fill" data-width="78%"></div></div>
+          </div>
+        </div>
+        <div class="cs-algo-chart">
+          <div class="cs-algo-bar" style="height:15%"></div>
+          <div class="cs-algo-bar" style="height:18%"></div>
+          <div class="cs-algo-bar" style="height:22%"></div>
+          <div class="cs-algo-bar" style="height:30%"></div>
+          <div class="cs-algo-bar" style="height:45%"></div>
+          <div class="cs-algo-bar" style="height:55%"></div>
+          <div class="cs-algo-bar" style="height:62%"></div>
+          <div class="cs-algo-bar" style="height:70%"></div>
+          <div class="cs-algo-bar" style="height:78%"></div>
+          <div class="cs-algo-bar" style="height:85%"></div>
+          <div class="cs-algo-bar" style="height:92%"></div>
+          <div class="cs-algo-bar" style="height:100%"></div>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted)">MONTHLY REACH TRAJECTORY — 12 MONTHS</div>
+      </div>
+    </div>
+
+    <div class="cs-breakdown">
+      <div class="cs-break-card challenge">
+        <div class="cs-break-label">The Challenge</div>
+        <ul>
+          <li>Instagram reach plummeted 73% after algorithm shift to Reels-first ranking</li>
+          <li>TikTok FYP rate stuck at 8% despite high production value</li>
+          <li>$4K/month content budget producing minimal ROI</li>
+          <li>Competitors with worse content were outperforming them 3:1</li>
+        </ul>
+      </div>
+      <div class="cs-break-card strategy">
+        <div class="cs-break-label">Our Strategy</div>
+        <ul>
+          <li>Built custom algorithm model for fitness content on IG + TikTok</li>
+          <li>Identified 6 "signal gaps" — watch time hooks, save triggers, and share mechanics they were missing</li>
+          <li>Restructured content calendar around algorithm-optimal posting cadence</li>
+          <li>Introduced "micro-authority" series — 15-sec tips that triggered binge-watch signals</li>
+        </ul>
+      </div>
+      <div class="cs-break-card results">
+        <div class="cs-break-label">The Results</div>
+        <ul>
+          <li>412% reach increase within 90 days</li>
+          <li>TikTok FYP rate jumped from 8% → 67%</li>
+          <li>Instagram Reels averaging 45K views (from 200)</li>
+          <li>14,000 new member signups attributed to social</li>
+          <li>$1.2M in tracked revenue over 12 months</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cs-quote">
+      <div class="cs-quote-text">Cam didn't just tell us to 'post more Reels.' He showed us exactly why the algorithm was suppressing our content and built a system around the signals we were missing. Within six weeks, our reach was 4x what it had ever been. We've had to hire two new front desk staff to handle the volume.</div>
+      <div class="cs-quote-meta">
+        <div class="cs-quote-av">NV</div>
+        <div><div class="cs-quote-name">Nadia Velasquez</div><div class="cs-quote-role">Director of Growth, Voltra Fitness Co.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CASE STUDY 2: DRIFTLINE SURF CO.                    -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="case-study scroll-section" id="case-2">
+  <div class="cs-inner">
+    <div class="cs-header">
+      <div>
+        <div class="cs-label-row">
+          <span class="cs-number">Case 02</span>
+          <span class="cs-industry-tag">E-Commerce / DTC</span>
+        </div>
+        <h2>Sunchasers Supply:<br>From ad spend <em>hemorrhage</em> to 3.1x ROAS.</h2>
+        <p>Driftline is a direct-to-consumer outdoor lifestyle brand based in Southern California. Beautiful products, loyal community, strong brand identity — but their paid advertising strategy was bleeding money.</p>
+        <p>They were spending $28K/month on Meta and Google ads with a ROAS of 0.9x. That means they were losing money on every dollar spent. Their previous agency kept saying "give it time" while the ad platform algorithms kept deprioritizing their campaigns.</p>
+        <p><strong>We modeled the auction dynamics of both platforms and discovered their entire bidding strategy was fighting the algorithm instead of working with it.</strong></p>
+      </div>
+      <div class="cs-stats-card">
+        <div class="label" style="margin-bottom:20px">Key Results</div>
+        <div class="cs-stats-grid">
+          <div class="cs-stat">
+            <span class="cs-stat-num">3.1x</span>
+            <span class="cs-stat-label">ROAS (from 0.9x)</span>
+            <div class="cs-stat-bar"><div class="cs-stat-bar-fill" data-width="88%"></div></div>
+          </div>
+          <div class="cs-stat">
+            <span class="cs-stat-num">$1.8M</span>
+            <span class="cs-stat-label">Revenue in 6 months</span>
+            <div class="cs-stat-bar"><div class="cs-stat-bar-fill" data-width="95%"></div></div>
+          </div>
+          <div class="cs-stat">
+            <span class="cs-stat-num">-42%</span>
+            <span class="cs-stat-label">Cost per acquisition</span>
+            <div class="cs-stat-bar"><div class="cs-stat-bar-fill" data-width="58%"></div></div>
+          </div>
+          <div class="cs-stat">
+            <span class="cs-stat-num">156%</span>
+            <span class="cs-stat-label">Conversion rate lift</span>
+            <div class="cs-stat-bar"><div class="cs-stat-bar-fill" data-width="76%"></div></div>
+          </div>
+        </div>
+        <div class="cs-algo-chart">
+          <div class="cs-algo-bar" style="height:100%"></div>
+          <div class="cs-algo-bar" style="height:90%"></div>
+          <div class="cs-algo-bar" style="height:75%"></div>
+          <div class="cs-algo-bar" style="height:60%"></div>
+          <div class="cs-algo-bar" style="height:48%"></div>
+          <div class="cs-algo-bar" style="height:42%"></div>
+          <div class="cs-algo-bar" style="height:38%"></div>
+          <div class="cs-algo-bar" style="height:35%"></div>
+          <div class="cs-algo-bar" style="height:32%"></div>
+          <div class="cs-algo-bar" style="height:30%"></div>
+          <div class="cs-algo-bar" style="height:28%"></div>
+          <div class="cs-algo-bar" style="height:26%"></div>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted)">COST PER ACQUISITION — 12 MONTHS (↓ is better)</div>
+      </div>
+    </div>
+
+    <div class="cs-breakdown">
+      <div class="cs-break-card challenge">
+        <div class="cs-break-label">The Challenge</div>
+        <ul>
+          <li>$28K/month ad spend with 0.9x ROAS — losing money</li>
+          <li>Meta's algorithm flagging their ads as low-relevance</li>
+          <li>Google Shopping campaigns stuck in "learning" limbo</li>
+          <li>Creative fatigue — audience was seeing the same ads 8+ times</li>
+        </ul>
+      </div>
+      <div class="cs-break-card strategy">
+        <div class="cs-break-label">Our Strategy</div>
+        <ul>
+          <li>Modeled Meta and Google auction algorithms to find optimal bid/budget combinations</li>
+          <li>Built creative testing framework that aligned with Meta's "exploration" reward signals</li>
+          <li>Restructured campaign architecture to avoid audience fragmentation</li>
+          <li>Implemented organic-to-paid pipeline using top-performing social content as ad creative</li>
+        </ul>
+      </div>
+      <div class="cs-break-card results">
+        <div class="cs-break-label">The Results</div>
+        <ul>
+          <li>ROAS jumped from 0.9x to 3.1x in 4 months</li>
+          <li>CPA dropped 42% while increasing total spend</li>
+          <li>$1.8M in tracked e-commerce revenue in 6 months</li>
+          <li>Conversion rate lifted 156% through landing page optimization</li>
+          <li>Now scaling to $60K/month profitably</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cs-quote">
+      <div class="cs-quote-text">Our old agency kept telling us to "trust the process." Cam showed us actual data on why our campaigns were underperforming — the algorithm was literally deprioritizing us because of how our campaigns were structured. He fixed it in two weeks. Our ROAS tripled in four months.</div>
+      <div class="cs-quote-meta">
+        <div class="cs-quote-av">TR</div>
+        <div><div class="cs-quote-name">Tomas Reifert</div><div class="cs-quote-role">Co-Founder, Sunchasers Supply</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- CASE STUDY 3: MERIDIAN ANALYTICS                    -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="case-study scroll-section" id="case-3">
+  <div class="cs-inner">
+    <div class="cs-header">
+      <div>
+        <div class="cs-label-row">
+          <span class="cs-number">Case 03</span>
+          <span class="cs-industry-tag">B2B SaaS</span>
+        </div>
+        <h2>Trellix Insights:<br>Page <em>nowhere</em> to page one.</h2>
+        <p>Trellix Insights builds data analytics dashboards for mid-market companies. Great product, strong funding, solid content team — but 18 months of publishing blog posts, whitepapers, and guides had produced almost zero organic search visibility.</p>
+        <p>They were ranking on page 4–8 for their most important keywords. Competitors with thinner content were dominating page one. Their content was better but Google's algorithm wasn't rewarding it.</p>
+        <p><strong>We ran our SEO algorithm model and found the answer in 48 hours: they were missing critical trust signals that Google's E-E-A-T framework now heavily weights.</strong></p>
+      </div>
+      <div class="cs-stats-card">
+        <div class="label" style="margin-bottom:20px">Key Results</div>
+        <div class="cs-stats-grid">
+          <div class="cs-stat">
+            <span class="cs-stat-num">890%</span>
+            <span class="cs-stat-label">Organic traffic growth</span>
+            <div class="cs-stat-bar"><div class="cs-stat-bar-fill" data-width="96%"></div></div>
+          </div>
+          <div class="cs-stat">
+            <span class="cs-stat-num">$1.2M</span>
+            <span class="cs-stat-label">Pipeline generated</span>
+            <div class="cs-stat-bar"><div class="cs-stat-bar-fill" data-width="82%"></div></div>
+          </div>
+          <div class="cs-stat">
+            <span class="cs-stat-num">47</span>
+            <span class="cs-stat-label">New page 1 keywords</span>
+            <div class="cs-stat-bar"><div class="cs-stat-bar-fill" data-width="72%"></div></div>
+          </div>
+          <div class="cs-stat">
+            <span class="cs-stat-num">4.8x</span>
+            <span class="cs-stat-label">Inbound lead volume</span>
+            <div class="cs-stat-bar"><div class="cs-stat-bar-fill" data-width="88%"></div></div>
+          </div>
+        </div>
+        <div class="cs-algo-chart">
+          <div class="cs-algo-bar" style="height:8%"></div>
+          <div class="cs-algo-bar" style="height:10%"></div>
+          <div class="cs-algo-bar" style="height:14%"></div>
+          <div class="cs-algo-bar" style="height:22%"></div>
+          <div class="cs-algo-bar" style="height:35%"></div>
+          <div class="cs-algo-bar" style="height:48%"></div>
+          <div class="cs-algo-bar" style="height:58%"></div>
+          <div class="cs-algo-bar" style="height:70%"></div>
+          <div class="cs-algo-bar" style="height:82%"></div>
+          <div class="cs-algo-bar" style="height:88%"></div>
+          <div class="cs-algo-bar" style="height:94%"></div>
+          <div class="cs-algo-bar" style="height:100%"></div>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted)">ORGANIC TRAFFIC — 12 MONTHS</div>
+      </div>
+    </div>
+
+    <div class="cs-breakdown">
+      <div class="cs-break-card challenge">
+        <div class="cs-break-label">The Challenge</div>
+        <ul>
+          <li>18 months of content production with near-zero search visibility</li>
+          <li>Ranking on pages 4–8 for critical B2B keywords</li>
+          <li>Competitors with less comprehensive content dominating page 1</li>
+          <li>$15K/month content budget with no measurable organic ROI</li>
+        </ul>
+      </div>
+      <div class="cs-break-card strategy">
+        <div class="cs-break-label">Our Strategy</div>
+        <ul>
+          <li>Ran proprietary E-E-A-T signal analysis — found 11 missing trust factors</li>
+          <li>Rebuilt site architecture to match Google's topical authority model</li>
+          <li>Implemented entity-based internal linking strategy</li>
+          <li>Optimized existing content for AI Overview inclusion signals</li>
+          <li>Built author authority pages and backlink strategy targeting trust domains</li>
+        </ul>
+      </div>
+      <div class="cs-break-card results">
+        <div class="cs-break-label">The Results</div>
+        <ul>
+          <li>890% organic traffic increase in 9 months</li>
+          <li>47 new page 1 keyword rankings (from 3)</li>
+          <li>Featured in 12 AI Overviews for high-intent queries</li>
+          <li>4.8x increase in inbound demo requests</li>
+          <li>$1.2M in tracked pipeline from organic search</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cs-quote">
+      <div class="cs-quote-text">We'd spent 18 months creating what we thought was great SEO content. Cam ran his model and showed us — in a spreadsheet, with actual data — exactly which trust signals Google was looking for that we were missing. Within two quarters, we went from page nobody to page one for 47 keywords. Our inbound pipeline has completely transformed.</div>
+      <div class="cs-quote-meta">
+        <div class="cs-quote-av">MT</div>
+        <div><div class="cs-quote-name">Ethan Calloway</div><div class="cs-quote-role">VP Digital, Trellix Insights</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OUR PROCESS -->
+<section class="process-section scroll-section" id="process">
+  <div class="s-pad">
+    <div class="label">Our Approach</div>
+    <h2 class="stitle">How every engagement works.</h2>
+    <p class="sdesc" style="margin-bottom:0">The same algorithm-first methodology powers every case study above. Here's what it looks like from day one.</p>
+    <div class="process-steps">
+      <div class="process-step"><div class="process-num">STEP 01</div><h3>Algorithm Audit</h3><p>We model how each relevant platform's algorithm currently sees your content. This reveals the exact signals you're missing — not guesses, data.</p></div>
+      <div class="process-step"><div class="process-num">STEP 02</div><h3>Custom Playbook</h3><p>We build a strategy document specific to your niche, platforms, and goals. Every recommendation is tied to a measurable signal the algorithm rewards.</p></div>
+      <div class="process-step"><div class="process-num">STEP 03</div><h3>Execute & Measure</h3><p>We launch the strategy — content, ads, SEO, social — and instrument everything. You'll see real-time dashboards showing exactly what's working and why.</p></div>
+      <div class="process-step"><div class="process-num">STEP 04</div><h3>Optimize & Scale</h3><p>Algorithms change constantly. We keep our models updated, adapt the strategy in real-time, and scale what's working. No scrambling, no surprises.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- AGGREGATE RESULTS -->
+<section class="results-agg scroll-section">
+  <div class="results-agg-inner">
+    <div class="label">By The Numbers</div>
+    <h2 class="stitle">Aggregate results across all clients.</h2>
+    <p class="sdesc" style="margin:0 auto;max-width:520px">These aren't cherry-picked outliers. These are averages across our full client portfolio — the result of consistently applying algorithm intelligence to marketing strategy.</p>
+    <div class="agg-grid">
+      <div class="agg-card"><div class="agg-num">347%</div><div class="agg-label">Avg. reach increase</div></div>
+      <div class="agg-card"><div class="agg-num">2.4x</div><div class="agg-label">Avg. ROAS improvement</div></div>
+      <div class="agg-card"><div class="agg-num">89M+</div><div class="agg-label">Total impressions engineered</div></div>
+      <div class="agg-card"><div class="agg-num">94.2</div><div class="agg-label">Avg. algo score post-optimization</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MORE TESTIMONIALS -->
+<section class="testimonials-section scroll-section">
+  <div class="s-pad">
+    <div class="label">Kind Words</div>
+    <h2 class="stitle">What clients are saying.</h2>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <div class="testimonial-text">Cam showed us which TikTok signals were throttling our content. Our FYP rate went from 8% to 67% in six weeks. We've never seen growth like this.</div>
+        <div class="testimonial-meta"><div class="testimonial-av">NV</div><div><div class="testimonial-name">Nadia Velasquez</div><div class="testimonial-role">Director of Growth, Voltra Fitness Co.</div></div></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <div class="testimonial-text">He predicted a YouTube algorithm shift two weeks early. We gained subscribers while competitors lost them. The data modeling is unlike anything I've seen.</div>
+        <div class="testimonial-meta"><div class="testimonial-av">PO</div><div><div class="testimonial-name">Priya Okonkwo</div><div class="testimonial-role">CMO, Lumivox Creative</div></div></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <div class="testimonial-text">18 months stagnant on Google. Cam found the missing trust signals. Page one for 34 new keywords in Q1. Our entire inbound strategy has been transformed.</div>
+        <div class="testimonial-meta"><div class="testimonial-av">MT</div><div><div class="testimonial-name">Ethan Calloway</div><div class="testimonial-role">VP Digital, Trellix Insights</div></div></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <div class="testimonial-text">We were spending $28K/month on ads and losing money. Cam restructured everything around the auction algorithm. We're now profitable at $60K/month. Absolute game changer.</div>
+        <div class="testimonial-meta"><div class="testimonial-av">TR</div><div><div class="testimonial-name">Tomas Reifert</div><div class="testimonial-role">Co-Founder, Sunchasers Supply</div></div></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <div class="testimonial-text">Cam doesn't just do marketing — he teaches you how the algorithms actually work. My team is 10x more strategic in how they think about content now. Worth every penny.</div>
+        <div class="testimonial-meta"><div class="testimonial-av">MT</div><div><div class="testimonial-name">Mariel Tanaka</div><div class="testimonial-role">VP Marketing, Verdana Wellness Group</div></div></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <div class="testimonial-text">The algorithm audit alone was worth 10x what we paid. Cam found issues in 48 hours that our in-house team had missed for a year. Incredible attention to detail.</div>
+        <div class="testimonial-meta"><div class="testimonial-av">DA</div><div><div class="testimonial-name">Devon Ashby</div><div class="testimonial-role">Director of Digital, Pinnrock Partners</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section scroll-section">
+  <div class="s-pad">
+    <div class="cta-inner">
+      <div class="label">Your Turn</div>
+      <h2 class="stitle">Ready to become the next case study?</h2>
+      <p class="sdesc">It starts with a free algorithm audit. We'll show you exactly what the platforms see when they look at your brand — and where the biggest opportunities are hiding. No commitment, no pitch. Just data.</p>
+      <div class="cta-buttons">
+        <a href="index.html#contact" class="btn btn-fill">Get Your Free Audit →</a>
+        <a href="index.html#services" class="btn btn-outline">See All Services</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <svg style="width:20px;height:20px" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="12" fill="#f59e0b"/><path d="M32 6 A26 26 0 0 1 58 32" stroke="#fbbf24" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M32 58 A26 26 0 0 1 6 32" stroke="#ea580c" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+    <span style="color:var(--text);font-weight:700">Solarium Marketing</span>
+    <span>&middot; &copy; 2026 &middot; A Solarium Holdings company</span>
+  </div>
+  <div class="footer-links">
+    <a href="index.html#services">Services</a>
+    <a href="case-studies.html">Case Studies</a>
+    <a href="index.html#contact">Contact</a>
+    <a href="services.html">Pricing</a>
+  </div>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// ── THREE.JS 3D BACKGROUND (identical to main site) ──
+const canvas3d = document.getElementById('three-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: canvas3d, alpha: true, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+const scene = new THREE.Scene();
+const camera3 = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+camera3.position.z = 5;
+
+const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.6);
+scene.add(ambientLight);
+const dirLight = new THREE.DirectionalLight(0xf59e0b, 0.8);
+dirLight.position.set(3, 5, 4);
+scene.add(dirLight);
+const pointLight = new THREE.PointLight(0xea580c, 0.4, 20);
+pointLight.position.set(-3, 2, 3);
+scene.add(pointLight);
+
+const shapes = [];
+const matWire = new THREE.MeshPhongMaterial({ color: 0xd97706, wireframe: true, transparent: true, opacity: 0.2 });
+const matSolid = new THREE.MeshPhongMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.08, shininess: 100 });
+
+function addShape(geo, x, y, z, wire) {
+  const mesh = new THREE.Mesh(geo, wire ? matWire : matSolid);
+  mesh.position.set(x, y, z);
+  mesh.userData = { baseY: y, speed: 0.3 + Math.random() * 0.5, rotSpeed: 0.002 + Math.random() * 0.005 };
+  scene.add(mesh);
+  shapes.push(mesh);
+  return mesh;
+}
+
+const mainSphere = addShape(new THREE.IcosahedronGeometry(0.8, 1), 2.5, 0, 0, true);
+addShape(new THREE.OctahedronGeometry(0.5, 0), -3, 1.5, -1, false);
+addShape(new THREE.TorusGeometry(0.6, 0.2, 16, 32), 3.5, -2, -2, true);
+addShape(new THREE.DodecahedronGeometry(0.4, 0), -2.5, -1, 1, false);
+addShape(new THREE.TetrahedronGeometry(0.5, 0), 1, 2.5, -1.5, true);
+addShape(new THREE.IcosahedronGeometry(0.3, 0), -1, -2.5, 0, false);
+addShape(new THREE.OctahedronGeometry(0.35, 0), 4, 1, -3, true);
+
+let scrollProgress = 0;
+ScrollTrigger.create({
+  trigger: 'body', start: 'top top', end: 'bottom bottom',
+  onUpdate: (self) => { scrollProgress = self.progress; }
+});
+
+function animate3D() {
+  requestAnimationFrame(animate3D);
+  const t = Date.now() * 0.001;
+  shapes.forEach((s, i) => {
+    s.rotation.x += s.userData.rotSpeed;
+    s.rotation.y += s.userData.rotSpeed * 1.3;
+    s.position.y = s.userData.baseY + Math.sin(t * s.userData.speed + i) * 0.3;
+  });
+  camera3.position.y = -scrollProgress * 3;
+  camera3.position.x = Math.sin(scrollProgress * Math.PI) * 0.5;
+  mainSphere.rotation.y = scrollProgress * Math.PI * 2;
+  mainSphere.scale.setScalar(1 + scrollProgress * 0.5);
+  renderer.render(scene, camera3);
+}
+animate3D();
+
+window.addEventListener('resize', () => {
+  camera3.aspect = window.innerWidth / window.innerHeight;
+  camera3.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ── HERO ENTRANCE ──
+const heroTL = gsap.timeline({ delay: 0.3 });
+heroTL.to('.hero-eyebrow', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' })
+  .to('.hero-section h1', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, '-=0.5')
+  .to('.hero-sub', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
+  .to('.hero-proof', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.4');
+
+// ── OVERVIEW CARDS STAGGER ──
+gsap.utils.toArray('.cs-overview-card').forEach((el, i) => {
+  gsap.fromTo(el, { y: 50, opacity: 0, scale: 0.95 }, {
+    y: 0, opacity: 1, scale: 1, duration: 0.7, delay: i * 0.15,
+    ease: 'power3.out',
+    scrollTrigger: { trigger: '.cs-overview-grid', start: 'top 75%' }
+  });
+});
+
+// ── CASE STUDY SECTIONS ──
+gsap.utils.toArray('.cs-header').forEach(el => {
+  gsap.fromTo(el.children[0], { x: -50, opacity: 0 }, {
+    x: 0, opacity: 1, duration: 1, ease: 'power3.out',
+    scrollTrigger: { trigger: el, start: 'top 60%' }
+  });
+  gsap.fromTo(el.children[1], { x: 50, opacity: 0 }, {
+    x: 0, opacity: 1, duration: 1, ease: 'power3.out',
+    scrollTrigger: { trigger: el, start: 'top 60%' }
+  });
+});
+
+// ── BREAKDOWN CARDS ──
+gsap.utils.toArray('.cs-break-card').forEach((el, i) => {
+  gsap.fromTo(el, { y: 40, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.7, delay: i * 0.12,
+    scrollTrigger: { trigger: el, start: 'top 80%' }
+  });
+});
+
+// ── STAT BAR FILLS ──
+gsap.utils.toArray('.cs-stat-bar-fill').forEach(el => {
+  gsap.to(el, {
+    scaleX: 1, duration: 1.2, ease: 'power3.out',
+    scrollTrigger: { trigger: el, start: 'top 85%' }
+  });
+  el.style.transform = `scaleX(${parseFloat(el.dataset.width) / 100})`;
+  el.style.transform = 'scaleX(0)';
+  gsap.to(el, {
+    scaleX: parseFloat(el.dataset.width) / 100,
+    duration: 1.2,
+    ease: 'power3.out',
+    scrollTrigger: { trigger: el.closest('.cs-stats-card'), start: 'top 65%' }
+  });
+});
+
+// ── QUOTES ──
+gsap.utils.toArray('.cs-quote').forEach(el => {
+  gsap.fromTo(el, { y: 30, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.8,
+    scrollTrigger: { trigger: el, start: 'top 80%' }
+  });
+});
+
+// ── PROCESS STEPS ──
+gsap.utils.toArray('.process-step').forEach((el, i) => {
+  gsap.fromTo(el, { y: 40, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.7, delay: i * 0.1,
+    scrollTrigger: { trigger: el, start: 'top 80%' }
+  });
+});
+
+// ── AGG CARDS ──
+gsap.utils.toArray('.agg-card').forEach((el, i) => {
+  gsap.fromTo(el, { y: 40, opacity: 0, scale: 0.95 }, {
+    y: 0, opacity: 1, scale: 1, duration: 0.6, delay: i * 0.1,
+    scrollTrigger: { trigger: el, start: 'top 80%' }
+  });
+});
+
+// ── TESTIMONIALS ──
+gsap.utils.toArray('.testimonial-card').forEach((el, i) => {
+  gsap.fromTo(el, { y: 50, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.7, delay: i * 0.1,
+    scrollTrigger: { trigger: el, start: 'top 85%' }
+  });
+});
+
+// ── SECTION LABELS & TITLES ──
+gsap.utils.toArray('.s-pad .label, .s-pad .stitle, .s-pad .sdesc, .results-agg-inner .label, .results-agg-inner .stitle, .results-agg-inner .sdesc, .cta-inner .label, .cta-inner .stitle, .cta-inner .sdesc').forEach(el => {
+  gsap.fromTo(el, { y: 30, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.7,
+    scrollTrigger: { trigger: el, start: 'top 85%' }
+  });
+});
+
+// ── CTA BUTTONS ──
+gsap.fromTo('.cta-buttons', { y: 20, opacity: 0 }, {
+  y: 0, opacity: 1, duration: 0.8,
+  scrollTrigger: { trigger: '.cta-buttons', start: 'top 85%' }
+});
+
+// ── NAV HIDE ON SCROLL ──
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+  const c = window.scrollY;
+  document.getElementById('nav').classList.toggle('hide', c > lastScroll && c > 80);
+  lastScroll = c;
+});
+
+// ── SMOOTH SCROLL ──
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>
